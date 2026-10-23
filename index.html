@@ -15,99 +15,172 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="hero" id="top">
-    <canvas id="court" role="img" aria-label="Pixel art of a koala in a blue and gold jersey shooting hoops on an outdoor court at dusk."></canvas>
+  <header class="hero" id="top" data-time="dusk">
+    <canvas id="court" role="img" aria-label="Pixel art of a koala in a blue and gold jersey shooting hoops on an outdoor court. The sky matches the time of day where you are."></canvas>
 
     <nav class="nav" aria-label="Sections">
       <a class="nav-name" href="#top">anish nambirajan</a>
       <ul>
         <li><a href="#about">about</a></li>
         <li><a href="#experience">experience</a></li>
+        <li><a href="#projects">projects</a></li>
         <li><a href="#contact">say hi</a></li>
       </ul>
     </nav>
 
     <div class="hero-copy">
       <h1>hi, i&rsquo;m anish.</h1>
-      <p>I study computer science at UC Irvine and build software across the stack, from React dashboards down to the workflows and services underneath. This summer I built creator auto-publishing at Roblox.</p>
+      <p>I study computer science at UC Irvine. I spent this summer as a software engineering intern at Roblox, and on the side I build LLM agents.</p>
     </div>
 
     <div class="hero-play">
-      <button id="shoot" type="button">Take a shot</button>
-      <p id="tally" aria-live="polite">Warming up.</p>
+      <button id="shoot" type="button">Hold to shoot</button>
+      <p id="tally" aria-live="polite">Hold, then let go at the top of the meter.</p>
     </div>
   </header>
 
   <main>
-    <section class="section" id="about" aria-labelledby="about-title">
-      <h2 id="about-title">about</h2>
-      <div class="section-body prose">
-        <p>I&rsquo;m working toward a B.S. in computer science at UC Irvine, graduating in June 2028 with a 3.9 GPA.</p>
-        <p>Most of my work so far sits where a product meets the infrastructure behind it. At Roblox I owned a feature end to end, from the Studio flow through a new gRPC service and a Temporal workflow to the dashboard creators use. Before that I helped build a course scheduler that 500+ UCI students used, and before any of it I spent three years teaching kids to write their first Python.</p>
-        <p>Day to day I write C#, TypeScript, and Python, with Temporal, Kafka, gRPC, and Docker underneath. I&rsquo;m also at home in Java, C++, SQL, React, and Node.</p>
+    <section class="band band-court" id="about" aria-labelledby="about-title">
+      <div class="wrap">
+        <h2 id="about-title">about</h2>
+        <div class="about-grid">
+          <div class="prose">
+            <p>I&rsquo;m a CS student at UC Irvine, graduating in 2028. I spent this past summer at Roblox, building the system that publishes a creator&rsquo;s item to the catalog as soon as moderation approves it.</p>
+            <p>Most of my free time goes into LLM side projects. Right now that&rsquo;s PaperMind, an agent that explains ML papers at whatever level you&rsquo;re reading at.</p>
+            <p>I mostly write Python, TypeScript, and C#, and I&rsquo;m comfortable in Java, C++, and SQL.</p>
+          </div>
+          <div class="interests">
+            <h3>Lately I&rsquo;m into</h3>
+            <dl>
+              <div><dt>Inference</dt><dd>Serving models faster and cheaper: KV-cache reuse, batching, vLLM.</dd></div>
+              <div><dt>Post-training and RL</dt><dd>Fine-tuning open models with SFT and DPO.</dd></div>
+              <div><dt>Retrieval</dt><dd>Hybrid search, and measuring where each method fails.</dd></div>
+              <div><dt>Evals</dt><dd>Faithfulness, calibration, and LLM judges worth trusting.</dd></div>
+              <div><dt>Agents</dt><dd>Tool use, MCP servers, and multi-agent setups.</dd></div>
+              <div><dt>Distributed systems</dt><dd>Workflows, retries, and idempotency, which is most of what I did at Roblox.</dd></div>
+            </dl>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="section" id="experience" aria-labelledby="experience-title">
-      <h2 id="experience-title">experience</h2>
-      <ol class="section-body jobs">
-        <li class="job">
-          <p class="job-when"><time datetime="2026-06">Jun</time>&ndash;<time datetime="2026-09">Sep 2026</time></p>
-          <div class="job-body">
-            <h3>Roblox</h3>
-            <p class="job-role">Software engineering intern, San Mateo</p>
-            <p>Built auto-publish for UGC creators end to end. Once moderation approves an item, it goes straight to the catalog with no manual publish step. The work touched Roblox Studio, the asset-upload pipeline, the moderation workflow, and the Creator Dashboard.</p>
-            <ul>
-              <li>Designed and deployed a new Dockerized gRPC microservice that stores each creator&rsquo;s publish preferences and per-item opt-ins, read by both the dashboard API and the publish workflow.</li>
-              <li>Wrote the Temporal workflow and C#/.NET publish activity that checks price floor, Robux balance, and permissions before committing. Deterministic UUIDv5 idempotency keys keep retries safe under at-least-once Kafka delivery.</li>
-              <li>Built the React/TypeScript dashboard and REST API for publish defaults and fee consent, snapshotting the agreed fee so items only publish on terms the creator accepted. Shipped behind a staged feature flag.</li>
-            </ul>
-            <p class="job-stack">C#/.NET, gRPC, Temporal, Kafka, Docker, React, TypeScript</p>
-          </div>
-        </li>
-        <li class="job">
-          <p class="job-when"><time datetime="2025-01">Jan</time>&ndash;<time datetime="2025-04">Apr 2025</time></p>
-          <div class="job-body">
-            <h3>ReadyTutor</h3>
-            <p class="job-role">Software engineering intern, Irvine</p>
-            <p>One of ten engineers building CourseEater, a UCI course scheduler with 500+ users.</p>
-            <ul>
-              <li>Shipped 10+ full-stack features with MongoDB, Express, React, Redux, and Node.</li>
-              <li>Integrated the Anteater API for live course data, then built availability tracking, prerequisite checks, grade-distribution charts, and automatic unit-load totals on top of it.</li>
-              <li>Tuned frontend rendering and backend queries, cutting the time it takes to build a schedule by 30%.</li>
-            </ul>
-            <p class="job-stack">MongoDB, Express, React, Redux, Node.js, Vite</p>
-          </div>
-        </li>
-        <li class="job">
-          <p class="job-when"><time datetime="2021-07">Jul 2021</time>&ndash;<time datetime="2024-08">Aug 2024</time></p>
-          <div class="job-body">
-            <h3>Orange Note Inc.</h3>
-            <p class="job-role">Computer science instructor and project coordinator, Fremont</p>
-            <ul>
-              <li>Designed a five-week Python curriculum for elementary through high school students.</li>
-              <li>Taught and mentored 50+ students, graded their assignments and final projects, and sent parents daily progress updates.</li>
-            </ul>
-          </div>
-        </li>
-      </ol>
+    <section class="band band-dusk" id="experience" aria-labelledby="experience-title">
+      <div class="wrap">
+        <h2 id="experience-title">experience</h2>
+        <ol class="jobs">
+          <li class="job job-feature">
+            <img class="job-logo" src="logos/roblox_logo.jpg" alt="" width="56" height="56">
+            <div class="job-body">
+              <div class="job-head">
+                <h3>Roblox</h3>
+                <p class="job-when"><time datetime="2026-06">Jun</time>&ndash;<time datetime="2026-09">Sep 2026</time></p>
+              </div>
+              <p class="job-role">Software engineering intern, San Mateo</p>
+              <p class="job-summary">Built auto-publish for UGC creators end to end: once moderation approves an item, it lands in the catalog on its own.</p>
+              <ul class="job-points">
+                <li>Designed and deployed a Dockerized gRPC service for creator publish preferences and per-item opt-ins.</li>
+                <li>Built the Temporal workflow and C#/.NET publish activity, with UUIDv5 idempotency keys so Kafka retries never double-publish.</li>
+                <li>Built the React/TypeScript dashboard and REST API for publish defaults and fee consent, shipped behind a staged feature flag.</li>
+              </ul>
+              <ul class="chips" aria-label="Tech used">
+                <li>C#/.NET</li><li>gRPC</li><li>Temporal</li><li>Kafka</li><li>Docker</li><li>React</li><li>TypeScript</li>
+              </ul>
+            </div>
+          </li>
+          <li class="job">
+            <img class="job-logo" src="logos/ready_tutor_logo.jpg" alt="" width="56" height="56">
+            <div class="job-body">
+              <div class="job-head">
+                <h3>ReadyTutor</h3>
+                <p class="job-when"><time datetime="2025-01">Jan</time>&ndash;<time datetime="2025-04">Apr 2025</time></p>
+              </div>
+              <p class="job-role">Software engineering intern, Irvine</p>
+              <p class="job-summary">Built CourseEater, a UCI course scheduler with 500+ users, on a 10-person team.</p>
+              <ul class="job-points">
+                <li>Shipped 10+ full-stack features on MongoDB, Express, React, and Node.</li>
+                <li>Integrated the Anteater API for live course data, prerequisite checks, and grade distributions.</li>
+                <li>Cut schedule-building time 30% by tuning frontend rendering and backend queries.</li>
+              </ul>
+              <ul class="chips" aria-label="Tech used">
+                <li>MongoDB</li><li>Express</li><li>React</li><li>Redux</li><li>Node.js</li><li>Vite</li>
+              </ul>
+            </div>
+          </li>
+          <li class="job">
+            <span class="job-logo job-logo-text" aria-hidden="true">AI</span>
+            <div class="job-body">
+              <div class="job-head">
+                <h3>AI @ UCI</h3>
+                <p class="job-when"><time datetime="2025-06">Jun 2025</time>&ndash;<time datetime="2026-06">Jun 2026</time></p>
+              </div>
+              <p class="job-role">Projects team</p>
+              <p class="job-summary">Designed starter projects for club members to build.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
     </section>
 
-    <section class="section" id="contact" aria-labelledby="contact-title">
-      <h2 id="contact-title">say hi</h2>
-      <div class="section-body">
-        <p class="contact-lead">Email is the fastest way to reach me.</p>
-        <p class="contact-email"><a href="mailto:anambira@uci.edu">anambira@uci.edu</a></p>
-        <ul class="contact-links">
-          <li><a href="https://www.linkedin.com/in/anish-nambirajan">LinkedIn</a></li>
-          <li><a href="https://github.com/an301">GitHub</a></li>
-        </ul>
+    <section class="band band-twilight" id="projects" aria-labelledby="projects-title">
+      <div class="wrap">
+        <h2 id="projects-title">projects</h2>
+        <div class="projects">
+          <article class="project">
+            <div class="project-head">
+              <h3>PaperMind</h3>
+              <p class="job-when"><time datetime="2026-02">Feb 2026</time>&ndash;now</p>
+            </div>
+            <p class="project-what">An agent that reads ML papers with you and explains them at your level. Answers cite the exact lines they come from, and it points out the prerequisites you&rsquo;re missing before it explains.</p>
+            <ul class="job-points">
+              <li>Hybrid BM25 + dense retrieval reaches 94.8% recall@10 on a 174-question benchmark over 8 papers.</li>
+              <li>Distilled Claude&rsquo;s answers into Mistral 7B with QLoRA SFT, then DPO, and served it with vLLM. Calibration accuracy went up 18%.</li>
+              <li>A hand-written ReAct loop drives three MCP servers, including a Neo4j graph of 359 ML concepts.</li>
+            </ul>
+            <ul class="chips" aria-label="Tech used">
+              <li>Claude</li><li>FastAPI</li><li>FAISS</li><li>Neo4j</li><li>Redis</li><li>vLLM</li><li>React</li>
+            </ul>
+            <p class="project-links"><a href="https://github.com/an301/papermind">Code on GitHub</a></p>
+          </article>
+          <article class="project">
+            <div class="project-head">
+              <h3>Lumi</h3>
+              <p class="job-when"><time datetime="2025-12">Dec 2025</time>&ndash;<time datetime="2026-02">Feb 2026</time></p>
+            </div>
+            <p class="project-what">A multi-agent virtual lab for drug discovery. Specialist agents investigate a research question, and an adversarial review panel scores how confident the findings are before they reach the report.</p>
+            <ul class="job-points">
+              <li>Built 4 MCP servers (BioRender, AntV, MockFlow, PyMOL) and 175+ tools across genomics, literature, and chemistry APIs.</li>
+              <li>Low-confidence findings go to human experts over Slack, backed by a SQLite world model that persists across sessions.</li>
+            </ul>
+            <ul class="chips" aria-label="Tech used">
+              <li>Claude</li><li>FastMCP</li><li>Pydantic</li><li>asyncio</li><li>SQLite</li><li>Next.js</li>
+            </ul>
+            <p class="project-links"><a href="https://github.com/rob-9/lumi">Code on GitHub</a></p>
+          </article>
+        </div>
       </div>
+    </section>
+
+    <section class="band band-night" id="contact" aria-labelledby="contact-title">
+      <div class="wrap">
+        <h2 id="contact-title">say hi</h2>
+        <div class="contact">
+          <p class="contact-lead">Email is the fastest way to reach me.</p>
+          <p class="contact-email"><a href="mailto:anambira@uci.edu">anambira@uci.edu</a></p>
+          <ul class="contact-links">
+            <li><a href="https://www.linkedin.com/in/anish-nambirajan">LinkedIn</a></li>
+            <li><a href="https://github.com/an301">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <canvas id="night" role="img" aria-label="A koala asleep on a basketball under a streetlight."></canvas>
     </section>
   </main>
 
   <footer class="footer">
-    <p>Anish Nambirajan, 2026</p>
+    <div class="wrap footer-row">
+      <p>Anish Nambirajan, 2026</p>
+      <p class="footer-egg"><span aria-hidden="true">&uarr;&uarr;&darr;&darr;&larr;&rarr;&larr;&rarr;BA</span> <span class="visually-hidden">Try the Konami code on the court.</span> Press T on the court to change the time of day.</p>
+    </div>
   </footer>
 
   <script src="koala.js"></script>

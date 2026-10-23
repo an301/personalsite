@@ -1,7 +1,9 @@
-/* Colors are sampled from the pixel court in koala.js. The page background
-   is the court surface, so the hero scene runs straight into the content. */
+/* Colors are sampled from the pixel court in koala.js. Scrolling down the
+   page runs from the court, through dusk, into night. */
 :root {
   --dusk: #2b3a6b;
+  --dusk-raised: #34467a;
+  --night: #141a36;
   --glow: #fff4e8;
   --haze: #d9ddef;
   --ink: #1d2645;
@@ -9,6 +11,7 @@
   --court: #e7e9ee;
   --rule: #cdd2dc;
   --ball: #dd6a2e;
+  --gold: #f4c542;
   --peach: #f7cda6;
 
   --display: "Corinthia", "Snell Roundhand", cursive;
@@ -16,6 +19,23 @@
 
   --gutter: clamp(1rem, 5vw, 4.5rem);
   --measure: 38rem;
+
+  /* Stepped corners, so boxes sit in the same pixel world as the court. */
+  --px4: polygon(
+    0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+  --px2: polygon(
+    0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px,
+    100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%,
+    2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px)
+  );
+
+  --edge-dusk: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 10V8H4V7H8V6H12V6H16V5H20V4H24V4H28V5H32V6H36V6H40V7H44V7H48V6H52V5H56V5H60V7H64V10Z' fill='%232b3a6b'/%3E%3C/svg%3E");
+  --edge-night: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 10V7H4V5H8V4H12V4H16V5H20V7H24V8H28V6H32V4H36V3H40V3H44V4H48V6H52V7H56V8H60V8H64V10Z' fill='%23141a36'/%3E%3C/svg%3E");
+  --stars: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' shape-rendering='crispEdges'%3E%3Crect x='15' y='46' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='54' y='45' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='31' y='14' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='55' y='4' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='31' y='41' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='54' y='30' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='56' y='5' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='22' y='48' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='38' y='30' width='1' height='1' fill='%235d6aa3'/%3E%3C/svg%3E");
 }
 
 *,
@@ -73,13 +93,26 @@ h2,
 h3,
 p,
 ul,
-ol {
+ol,
+dl,
+dd {
   margin: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* Hero ------------------------------------------------------------------ */
 
 .hero {
+  --hero-fg: var(--glow);
+  --hero-soft: var(--haze);
   position: relative;
   height: 100vh;
   height: 100svh;
@@ -87,7 +120,13 @@ ol {
   max-height: 68rem;
   overflow: hidden;
   background: var(--dusk);
-  color: var(--glow);
+  color: var(--hero-fg);
+}
+
+/* Daytime sky is light, so the hero text flips to ink. */
+.hero[data-time="day"] {
+  --hero-fg: var(--ink);
+  --hero-soft: #26304f;
 }
 
 #court {
@@ -98,6 +137,9 @@ ol {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .nav {
@@ -112,17 +154,28 @@ ol {
 
 .nav a {
   text-decoration: none;
-  color: var(--haze);
+  color: var(--hero-soft);
 }
 
 .nav a:hover {
-  color: var(--glow);
+  color: var(--hero-fg);
   text-decoration: underline;
   text-decoration-color: var(--peach);
 }
 
 .nav-name {
   font-weight: 500;
+}
+
+/* The hero already says the name; phones need the room for section links. */
+@media (max-width: 34rem) {
+  .nav {
+    justify-content: flex-end;
+  }
+
+  .nav-name {
+    display: none;
+  }
 }
 
 .nav ul {
@@ -143,9 +196,8 @@ ol {
   font-weight: 400;
   font-size: clamp(4.5rem, 11vw, 10rem);
   line-height: 0.85;
-  letter-spacing: 0;
   margin-left: -0.04em;
-  color: var(--glow);
+  color: var(--hero-fg);
 }
 
 .hero-copy p {
@@ -153,12 +205,13 @@ ol {
   margin-top: 1.5rem;
   font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
   line-height: 1.55;
-  color: var(--haze);
+  color: var(--hero-soft);
 }
 
 .hero-play {
   position: absolute;
   left: var(--gutter);
+  right: var(--gutter);
   bottom: 0.875rem;
   display: flex;
   align-items: center;
@@ -167,8 +220,8 @@ ol {
   font-size: 0.9375rem;
 }
 
-/* Stepped corners so the button sits in the same pixel world as the court. */
 .hero-play button {
+  flex: none;
   padding: 0.5rem 0.9rem 0.55rem;
   border: 0;
   background: var(--ink);
@@ -176,12 +229,10 @@ ol {
   font: inherit;
   font-weight: 500;
   cursor: pointer;
-  clip-path: polygon(
-    0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0,
-    calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px,
-    100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%,
-    4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px)
-  );
+  clip-path: var(--px4);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .hero-play button:hover {
@@ -200,142 +251,305 @@ ol {
 
 #tally {
   color: var(--muted);
+  line-height: 1.35;
 }
 
-/* Sections -------------------------------------------------------------- */
+/* Bands ----------------------------------------------------------------- */
 
-main {
-  padding: clamp(3.5rem, 9vw, 7rem) var(--gutter) 0;
+.band {
+  position: relative;
+  scroll-margin-top: 0;
 }
 
-.section {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1.25rem;
-  max-width: 64rem;
-  scroll-margin-top: 2rem;
+.wrap {
+  max-width: 92rem;
+  padding-inline: var(--gutter);
 }
 
-.section + .section {
-  margin-top: clamp(4.5rem, 10vw, 8rem);
-}
-
-.section h2 {
+.band h2 {
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(3.25rem, 6vw, 4.25rem);
+  font-size: clamp(3.5rem, 6.5vw, 4.75rem);
   line-height: 0.9;
-  letter-spacing: 0;
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
 }
 
-.section-body {
-  max-width: var(--measure);
+/* Pixel hills that the next band rises out of. */
+.band-dusk::before,
+.band-twilight::before,
+.band-night::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 40px;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: 256px 40px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.band-dusk::before {
+  background-image: var(--edge-dusk);
+}
+
+.band-twilight::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 10V6H4V7H8V7H12V6H16V5H20V5H24V6H28V7H32V8H36V8H40V7H44V6H48V6H52V5H56V4H60V5H64V10Z' fill='%23202b55'/%3E%3C/svg%3E");
+}
+
+.band-night::before {
+  background-image: var(--edge-night);
+}
+
+/* About ----------------------------------------------------------------- */
+
+.band-court {
+  padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(4.5rem, 8vw, 6rem);
+}
+
+.about-grid {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
 }
 
 @media (min-width: 60rem) {
-  .section {
-    grid-template-columns: 13rem minmax(0, 1fr);
-    gap: 2rem;
-  }
-
-  .section h2 {
-    margin-top: -0.35rem;
+  .about-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(3rem, 6vw, 5.5rem);
   }
 }
 
+.prose {
+  max-width: var(--measure);
+  font-size: 1.1875rem;
+}
+
 .prose p + p {
-  margin-top: 1.1em;
+  margin-top: 1em;
+}
+
+.interests h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.interests dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.1rem 1.25rem;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.interests dl > div:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (min-width: 30rem) {
+  .interests dl > div {
+    grid-template-columns: 11rem minmax(0, 1fr);
+  }
+}
+
+.interests dt {
+  font-weight: 600;
+}
+
+.interests dd {
+  color: var(--muted);
 }
 
 /* Experience ------------------------------------------------------------ */
 
+.band-dusk {
+  padding: clamp(2.5rem, 5vw, 3.5rem) 0 clamp(4.5rem, 8vw, 6rem);
+  background: var(--dusk);
+  color: var(--glow);
+}
+
 .jobs {
+  display: grid;
+  gap: 3rem;
   padding: 0;
   list-style: none;
 }
 
-.job {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.25rem;
+/* Roblox takes the left column; the shorter roles stack on the right. */
+@media (min-width: 64rem) {
+  .jobs {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 2.75rem clamp(3rem, 6vw, 5rem);
+  }
+
+  .job-feature {
+    grid-row: span 2;
+  }
 }
 
-.job + .job {
-  margin-top: 3rem;
-  padding-top: 3rem;
-  border-top: 1px solid var(--rule);
+.job {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.job-logo {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  background: #fff;
+  clip-path: var(--px4);
+}
+
+.job-logo-text {
+  display: grid;
+  place-items: center;
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+
+.job-head,
+.project-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+}
+
+.job h3,
+.project h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
 }
 
 .job-when {
   font-size: 0.9375rem;
-  color: var(--muted);
+  color: var(--haze);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  padding-top: 0.2rem;
-}
-
-.job h3 {
-  font-size: 1.375rem;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
 }
 
 .job-role {
-  color: var(--muted);
-  margin-bottom: 0.9rem;
+  color: var(--haze);
 }
 
-.job-body > p + ul,
-.job-body > ul + p {
-  margin-top: 0.9rem;
+.job-summary {
+  margin-top: 0.75rem;
 }
 
-.job ul {
-  padding-left: 1.1em;
+.job-points {
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
 }
 
-.job li + li {
-  margin-top: 0.55rem;
+.job-points li {
+  position: relative;
+  padding-left: 1.4rem;
 }
 
-.job li::marker {
-  color: var(--ball);
+.job-points li + li {
+  margin-top: 0.45rem;
 }
 
-.job-stack {
-  font-size: 0.9375rem;
-  color: var(--muted);
+/* Square bullets, one art pixel each. */
+.job-points li::before {
+  content: "";
+  position: absolute;
+  left: 0.15rem;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  background: var(--ball);
 }
 
-@media (min-width: 44rem) {
-  .job {
-    grid-template-columns: 8.5rem minmax(0, 1fr);
-    gap: 1.5rem;
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1.1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  padding: 0.2rem 0.6rem 0.25rem;
+  background: var(--dusk-raised);
+  color: var(--haze);
+  font-size: 0.875rem;
+  font-weight: 500;
+  clip-path: var(--px2);
+}
+
+/* Projects -------------------------------------------------------------- */
+
+.band-twilight {
+  --dusk-raised: #2c3970;
+  padding: clamp(2.5rem, 5vw, 3.5rem) 0 clamp(4.5rem, 8vw, 6rem);
+  background: #202b55;
+  color: var(--glow);
+}
+
+.projects {
+  display: grid;
+  gap: 3rem;
+}
+
+@media (min-width: 60rem) {
+  .projects {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(3rem, 6vw, 5rem);
   }
+}
 
-  /* The dates sit outside the measure, so let the job body use all of it. */
-  .jobs {
-    max-width: calc(var(--measure) + 10rem);
-  }
+.project-what {
+  margin-top: 0.6rem;
+}
+
+.project-links {
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+.project-links a {
+  text-decoration-color: var(--peach);
 }
 
 /* Contact --------------------------------------------------------------- */
 
+.band-night {
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+  background: var(--night) var(--stars) repeat;
+  background-size: 192px 192px;
+  image-rendering: pixelated;
+  color: var(--glow);
+}
+
 .contact-lead {
-  color: var(--muted);
+  color: var(--haze);
 }
 
 .contact-email {
   margin-top: 0.4rem;
-  font-size: clamp(1.625rem, 4vw, 2.5rem);
+  font-size: clamp(1.75rem, 4.5vw, 3rem);
   font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 
 .contact-email a {
+  text-decoration-color: var(--peach);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.18em;
 }
@@ -348,10 +562,34 @@ main {
   list-style: none;
 }
 
+.contact-links a {
+  text-decoration-color: var(--peach);
+}
+
+#night {
+  display: block;
+  margin-top: 1.5rem;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: pointer;
+}
+
 /* Footer ---------------------------------------------------------------- */
 
 .footer {
-  padding: clamp(5rem, 12vw, 9rem) var(--gutter) 2rem;
-  font-size: 0.9375rem;
-  color: var(--muted);
+  padding: 1.5rem 0 2rem;
+  background: #1c2347;
+  color: var(--haze);
+  font-size: 0.875rem;
+}
+
+.footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+.footer-egg {
+  opacity: 0.7;
 }
