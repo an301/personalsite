@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anish Nambirajan</title>
+  <meta name="description" content="Anish Nambirajan studies computer science at UC Irvine and builds software across the stack. Most recently a software engineering intern at Roblox.">
+  <meta property="og:title" content="Anish Nambirajan">
+  <meta property="og:description" content="Computer science at UC Irvine. Software engineering intern at Roblox, summer 2026.">
+  <meta name="theme-color" content="#2b3a6b">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Corinthia&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero" id="top">
+    <canvas id="court" role="img" aria-label="Pixel art of a koala in a blue and gold jersey shooting hoops on an outdoor court at dusk."></canvas>
+
+    <nav class="nav" aria-label="Sections">
+      <a class="nav-name" href="#top">anish nambirajan</a>
+      <ul>
+        <li><a href="#about">about</a></li>
+        <li><a href="#experience">experience</a></li>
+        <li><a href="#contact">say hi</a></li>
+      </ul>
+    </nav>
+
+    <div class="hero-copy">
+      <h1>hi, i&rsquo;m anish.</h1>
+      <p>I study computer science at UC Irvine and build software across the stack, from React dashboards down to the workflows and services underneath. This summer I built creator auto-publishing at Roblox.</p>
+    </div>
+
+    <div class="hero-play">
+      <button id="shoot" type="button">Take a shot</button>
+      <p id="tally" aria-live="polite">Warming up.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="about" aria-labelledby="about-title">
+      <h2 id="about-title">about</h2>
+      <div class="section-body prose">
+        <p>I&rsquo;m working toward a B.S. in computer science at UC Irvine, graduating in June 2028 with a 3.9 GPA.</p>
+        <p>Most of my work so far sits where a product meets the infrastructure behind it. At Roblox I owned a feature end to end, from the Studio flow through a new gRPC service and a Temporal workflow to the dashboard creators use. Before that I helped build a course scheduler that 500+ UCI students used, and before any of it I spent three years teaching kids to write their first Python.</p>
+        <p>Day to day I write C#, TypeScript, and Python, with Temporal, Kafka, gRPC, and Docker underneath. I&rsquo;m also at home in Java, C++, SQL, React, and Node.</p>
+      </div>
+    </section>
+
+    <section class="section" id="experience" aria-labelledby="experience-title">
+      <h2 id="experience-title">experience</h2>
+      <ol class="section-body jobs">
+        <li class="job">
+          <p class="job-when"><time datetime="2026-06">Jun</time>&ndash;<time datetime="2026-09">Sep 2026</time></p>
+          <div class="job-body">
+            <h3>Roblox</h3>
+            <p class="job-role">Software engineering intern, San Mateo</p>
+            <p>Built auto-publish for UGC creators end to end. Once moderation approves an item, it goes straight to the catalog with no manual publish step. The work touched Roblox Studio, the asset-upload pipeline, the moderation workflow, and the Creator Dashboard.</p>
+            <ul>
+              <li>Designed and deployed a new Dockerized gRPC microservice that stores each creator&rsquo;s publish preferences and per-item opt-ins, read by both the dashboard API and the publish workflow.</li>
+              <li>Wrote the Temporal workflow and C#/.NET publish activity that checks price floor, Robux balance, and permissions before committing. Deterministic UUIDv5 idempotency keys keep retries safe under at-least-once Kafka delivery.</li>
+              <li>Built the React/TypeScript dashboard and REST API for publish defaults and fee consent, snapshotting the agreed fee so items only publish on terms the creator accepted. Shipped behind a staged feature flag.</li>
+            </ul>
+            <p class="job-stack">C#/.NET, gRPC, Temporal, Kafka, Docker, React, TypeScript</p>
+          </div>
+        </li>
+        <li class="job">
+          <p class="job-when"><time datetime="2025-01">Jan</time>&ndash;<time datetime="2025-04">Apr 2025</time></p>
+          <div class="job-body">
+            <h3>ReadyTutor</h3>
+            <p class="job-role">Software engineering intern, Irvine</p>
+            <p>One of ten engineers building CourseEater, a UCI course scheduler with 500+ users.</p>
+            <ul>
+              <li>Shipped 10+ full-stack features with MongoDB, Express, React, Redux, and Node.</li>
+              <li>Integrated the Anteater API for live course data, then built availability tracking, prerequisite checks, grade-distribution charts, and automatic unit-load totals on top of it.</li>
+              <li>Tuned frontend rendering and backend queries, cutting the time it takes to build a schedule by 30%.</li>
+            </ul>
+            <p class="job-stack">MongoDB, Express, React, Redux, Node.js, Vite</p>
+          </div>
+        </li>
+        <li class="job">
+          <p class="job-when"><time datetime="2021-07">Jul 2021</time>&ndash;<time datetime="2024-08">Aug 2024</time></p>
+          <div class="job-body">
+            <h3>Orange Note Inc.</h3>
+            <p class="job-role">Computer science instructor and project coordinator, Fremont</p>
+            <ul>
+              <li>Designed a five-week Python curriculum for elementary through high school students.</li>
+              <li>Taught and mentored 50+ students, graded their assignments and final projects, and sent parents daily progress updates.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">say hi</h2>
+      <div class="section-body">
+        <p class="contact-lead">Email is the fastest way to reach me.</p>
+        <p class="contact-email"><a href="mailto:anambira@uci.edu">anambira@uci.edu</a></p>
+        <ul class="contact-links">
+          <li><a href="https://www.linkedin.com/in/anish-nambirajan">LinkedIn</a></li>
+          <li><a href="https://github.com/an301">GitHub</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Anish Nambirajan, 2026</p>
+  </footer>
+
+  <script src="koala.js"></script>
+</body>
+</html>

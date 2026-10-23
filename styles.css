@@ -1,0 +1,357 @@
+/* Colors are sampled from the pixel court in koala.js. The page background
+   is the court surface, so the hero scene runs straight into the content. */
+:root {
+  --dusk: #2b3a6b;
+  --glow: #fff4e8;
+  --haze: #d9ddef;
+  --ink: #1d2645;
+  --muted: #4f5873;
+  --court: #e7e9ee;
+  --rule: #cdd2dc;
+  --ball: #dd6a2e;
+  --peach: #f7cda6;
+
+  --display: "Corinthia", "Snell Roundhand", cursive;
+  --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+
+  --gutter: clamp(1rem, 5vw, 4.5rem);
+  --measure: 38rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--court);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--peach);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--ball);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ball);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+/* Hero ------------------------------------------------------------------ */
+
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 34rem;
+  max-height: 68rem;
+  overflow: hidden;
+  background: var(--dusk);
+  color: var(--glow);
+}
+
+#court {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: pointer;
+}
+
+.nav {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.5rem var(--gutter) 0;
+  font-size: 1rem;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--haze);
+}
+
+.nav a:hover {
+  color: var(--glow);
+  text-decoration: underline;
+  text-decoration-color: var(--peach);
+}
+
+.nav-name {
+  font-weight: 500;
+}
+
+.nav ul {
+  display: flex;
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: 0;
+  list-style: none;
+}
+
+.hero-copy {
+  position: relative;
+  padding: clamp(2.5rem, 9vh, 6.5rem) var(--gutter) 0;
+  pointer-events: none;
+}
+
+.hero-copy h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(4.5rem, 11vw, 10rem);
+  line-height: 0.85;
+  letter-spacing: 0;
+  margin-left: -0.04em;
+  color: var(--glow);
+}
+
+.hero-copy p {
+  max-width: 31rem;
+  margin-top: 1.5rem;
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--haze);
+}
+
+.hero-play {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  color: var(--ink);
+  font-size: 0.9375rem;
+}
+
+/* Stepped corners so the button sits in the same pixel world as the court. */
+.hero-play button {
+  padding: 0.5rem 0.9rem 0.55rem;
+  border: 0;
+  background: var(--ink);
+  color: var(--court);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  clip-path: polygon(
+    0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+.hero-play button:hover {
+  background: var(--dusk);
+}
+
+.hero-play button:active {
+  transform: translateY(1px);
+}
+
+.hero-play button:focus-visible {
+  outline: none;
+  background: var(--ball);
+  color: var(--ink);
+}
+
+#tally {
+  color: var(--muted);
+}
+
+/* Sections -------------------------------------------------------------- */
+
+main {
+  padding: clamp(3.5rem, 9vw, 7rem) var(--gutter) 0;
+}
+
+.section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  max-width: 64rem;
+  scroll-margin-top: 2rem;
+}
+
+.section + .section {
+  margin-top: clamp(4.5rem, 10vw, 8rem);
+}
+
+.section h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(3.25rem, 6vw, 4.25rem);
+  line-height: 0.9;
+  letter-spacing: 0;
+}
+
+.section-body {
+  max-width: var(--measure);
+}
+
+@media (min-width: 60rem) {
+  .section {
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .section h2 {
+    margin-top: -0.35rem;
+  }
+}
+
+.prose p + p {
+  margin-top: 1.1em;
+}
+
+/* Experience ------------------------------------------------------------ */
+
+.jobs {
+  padding: 0;
+  list-style: none;
+}
+
+.job {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+}
+
+.job + .job {
+  margin-top: 3rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--rule);
+}
+
+.job-when {
+  font-size: 0.9375rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-top: 0.2rem;
+}
+
+.job h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.job-role {
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+}
+
+.job-body > p + ul,
+.job-body > ul + p {
+  margin-top: 0.9rem;
+}
+
+.job ul {
+  padding-left: 1.1em;
+}
+
+.job li + li {
+  margin-top: 0.55rem;
+}
+
+.job li::marker {
+  color: var(--ball);
+}
+
+.job-stack {
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+@media (min-width: 44rem) {
+  .job {
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  /* The dates sit outside the measure, so let the job body use all of it. */
+  .jobs {
+    max-width: calc(var(--measure) + 10rem);
+  }
+}
+
+/* Contact --------------------------------------------------------------- */
+
+.contact-lead {
+  color: var(--muted);
+}
+
+.contact-email {
+  margin-top: 0.4rem;
+  font-size: clamp(1.625rem, 4vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  overflow-wrap: anywhere;
+}
+
+.contact-email a {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.contact-links {
+  display: flex;
+  gap: 1.75rem;
+  margin-top: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* Footer ---------------------------------------------------------------- */
+
+.footer {
+  padding: clamp(5rem, 12vw, 9rem) var(--gutter) 2rem;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
