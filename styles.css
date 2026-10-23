@@ -266,7 +266,8 @@ dd {
   padding-inline: var(--gutter);
 }
 
-.band h2 {
+.band h2,
+.display-heading {
   font-family: var(--display);
   font-weight: 400;
   font-size: clamp(3.5rem, 6.5vw, 4.75rem);
@@ -331,37 +332,46 @@ dd {
   margin-top: 1em;
 }
 
-.interests h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
 
-.interests dl > div {
+.badges {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.1rem 1.25rem;
-  padding: 0.7rem 0;
-  border-top: 1px solid var(--rule);
+  gap: 1.25rem 1.75rem;
+  padding: 0;
+  list-style: none;
 }
 
-.interests dl > div:last-child {
-  border-bottom: 1px solid var(--rule);
-}
-
-@media (min-width: 30rem) {
-  .interests dl > div {
-    grid-template-columns: 11rem minmax(0, 1fr);
+@media (min-width: 36rem) {
+  .badges {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
-.interests dt {
-  font-weight: 600;
+.badge {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
 }
 
-.interests dd {
+.badge-art {
+  display: block;
+  width: 52px;
+  height: 56px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.badge-name {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.badge-desc {
+  font-size: 0.9375rem;
+  line-height: 1.45;
   color: var(--muted);
 }
+
 
 /* Experience ------------------------------------------------------------ */
 
@@ -371,30 +381,106 @@ dd {
   color: var(--glow);
 }
 
-.jobs {
+/* Timeline: newest first. Dates on the left, a rail with the logos as
+   stops, then the work, then the stack. Phones fold the date and stack into
+   the content column. */
+.timeline {
+  --rail: #4a5a92;
+  --stop-gap: 3rem;
   display: grid;
-  gap: 3rem;
+  gap: var(--stop-gap);
+  max-width: 68rem;
   padding: 0;
   list-style: none;
 }
 
-/* Roblox takes the left column; the shorter roles stack on the right. */
-@media (min-width: 64rem) {
-  .jobs {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: 2.75rem clamp(3rem, 6vw, 5rem);
-  }
-
-  .job-feature {
-    grid-row: span 2;
-  }
+.stop {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-areas:
+    "node when"
+    "node body"
+    "node stack";
+  column-gap: 1.25rem;
 }
 
-.job {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: 1.25rem;
-  align-content: start;
+.stop-when {
+  grid-area: when;
+  color: var(--haze);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stop-year {
+  margin-right: 0.3rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.stop-node {
+  grid-area: node;
+  position: relative;
+}
+
+/* A frame around each logo; the newest stop's frame is gold. */
+.stop-node .job-logo {
+  box-sizing: content-box;
+  padding: 4px;
+  background-color: var(--dusk-raised);
+  background-clip: border-box;
+}
+
+.stop-latest .stop-node .job-logo {
+  background-color: var(--gold);
+}
+
+/* Solid rail from this logo down to the next one. Nothing after the last. */
+.stop:not(:last-child) .stop-node::after {
+  content: "";
+  position: absolute;
+  left: 26px;
+  top: calc(56px + 8px);
+  bottom: calc(-1 * var(--stop-gap) + 8px);
+  width: 4px;
+  background: var(--rail);
+}
+
+.stop-body {
+  grid-area: body;
+}
+
+.stop-stack {
+  grid-area: stack;
+}
+
+@media (min-width: 64rem) {
+  .stop {
+    grid-template-columns: 7.5rem 56px minmax(0, 1fr) 13rem;
+    grid-template-areas: "when node body stack";
+    column-gap: 1.75rem;
+  }
+
+  .stop-when {
+    padding-top: 0.6rem;
+    text-align: right;
+  }
+
+  .stop-year {
+    display: block;
+    margin: 0 0 0.2rem;
+    font-size: 1.625rem;
+    line-height: 1;
+  }
+
+  .stop-body {
+    padding-top: 0.55rem;
+  }
+
+  .stop-stack {
+    align-content: flex-start;
+    margin-top: 0;
+    padding-top: 0.7rem;
+  }
 }
 
 .job-logo {
@@ -406,16 +492,10 @@ dd {
   clip-path: var(--px4);
 }
 
-.job-logo-text {
-  display: grid;
-  place-items: center;
-  background: var(--gold);
-  color: var(--ink);
-  font-weight: 600;
-  font-size: 1.0625rem;
+.job-logo-dark {
+  background: #0f1040;
 }
 
-.job-head,
 .project-head {
   display: flex;
   flex-wrap: wrap;
@@ -424,7 +504,7 @@ dd {
   gap: 0.25rem 1rem;
 }
 
-.job h3,
+.stop h3,
 .project h3 {
   font-size: 1.5rem;
   font-weight: 600;
@@ -502,18 +582,52 @@ dd {
 
 .projects {
   display: grid;
-  gap: 3rem;
+  gap: clamp(3rem, 6vw, 4.5rem);
+}
+
+.project {
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
 }
 
 @media (min-width: 60rem) {
-  .projects {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: clamp(3rem, 6vw, 5rem);
+  .project {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .project-flip .project-shot {
+    order: 2;
   }
 }
 
+/* Screenshots sit in a stepped frame, like a window in the pixel world. */
+.project-shot {
+  display: block;
+  padding: 6px;
+  background: var(--dusk-raised);
+  clip-path: var(--px4);
+  transition: background-color 150ms ease;
+}
+
+.project-shot:hover {
+  background: var(--gold);
+}
+
+.project-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  clip-path: var(--px2);
+}
+
+.project h3 {
+  font-size: 2rem;
+}
+
 .project-what {
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
 }
 
 .project-links {

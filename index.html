@@ -42,23 +42,59 @@
   <main>
     <section class="band band-court" id="about" aria-labelledby="about-title">
       <div class="wrap">
-        <h2 id="about-title">about</h2>
         <div class="about-grid">
           <div class="prose">
+            <h2 id="about-title">about</h2>
             <p>I&rsquo;m a CS student at UC Irvine, graduating in 2028. I spent this past summer at Roblox, building the system that publishes a creator&rsquo;s item to the catalog as soon as moderation approves it.</p>
             <p>Most of my free time goes into LLM side projects. Right now that&rsquo;s PaperMind, an agent that explains ML papers at whatever level you&rsquo;re reading at.</p>
             <p>I mostly write Python, TypeScript, and C#, and I&rsquo;m comfortable in Java, C++, and SQL.</p>
           </div>
           <div class="interests">
-            <h3>Lately I&rsquo;m into</h3>
-            <dl>
-              <div><dt>Inference</dt><dd>Serving models faster and cheaper: KV-cache reuse, batching, vLLM.</dd></div>
-              <div><dt>Post-training and RL</dt><dd>Fine-tuning open models with SFT and DPO.</dd></div>
-              <div><dt>Retrieval</dt><dd>Hybrid search, and measuring where each method fails.</dd></div>
-              <div><dt>Evals</dt><dd>Faithfulness, calibration, and LLM judges worth trusting.</dd></div>
-              <div><dt>Agents</dt><dd>Tool use, MCP servers, and multi-agent setups.</dd></div>
-              <div><dt>Distributed systems</dt><dd>Workflows, retries, and idempotency, which is most of what I did at Roblox.</dd></div>
-            </dl>
+            <h3 class="display-heading">lately i&rsquo;m into</h3>
+            <ul class="badges">
+              <li class="badge" data-badge="bolt">
+                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
+                <div>
+                  <p class="badge-name">Inference</p>
+                  <p class="badge-desc">Serving models faster and cheaper, with KV-cache reuse and vLLM.</p>
+                </div>
+              </li>
+              <li class="badge" data-badge="dumbbell">
+                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
+                <div>
+                  <p class="badge-name">Post-training</p>
+                  <p class="badge-desc">Fine-tuning open models with SFT and DPO.</p>
+                </div>
+              </li>
+              <li class="badge" data-badge="lens">
+                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
+                <div>
+                  <p class="badge-name">Retrieval</p>
+                  <p class="badge-desc">Hybrid search, and measuring where each method fails.</p>
+                </div>
+              </li>
+              <li class="badge" data-badge="check">
+                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
+                <div>
+                  <p class="badge-name">Evals</p>
+                  <p class="badge-desc">Faithfulness, calibration, and LLM judges worth trusting.</p>
+                </div>
+              </li>
+              <li class="badge" data-badge="robot">
+                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
+                <div>
+                  <p class="badge-name">Agents</p>
+                  <p class="badge-desc">Tool use, MCP servers, and many agents arguing it out.</p>
+                </div>
+              </li>
+              <li class="badge" data-badge="nodes">
+                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
+                <div>
+                  <p class="badge-name">Distributed systems</p>
+                  <p class="badge-desc">Workflows, retries, and idempotency.</p>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -67,14 +103,12 @@
     <section class="band band-dusk" id="experience" aria-labelledby="experience-title">
       <div class="wrap">
         <h2 id="experience-title">experience</h2>
-        <ol class="jobs">
-          <li class="job job-feature">
-            <img class="job-logo" src="logos/roblox_logo.jpg" alt="" width="56" height="56">
-            <div class="job-body">
-              <div class="job-head">
-                <h3>Roblox</h3>
-                <p class="job-when"><time datetime="2026-06">Jun</time>&ndash;<time datetime="2026-09">Sep 2026</time></p>
-              </div>
+        <ol class="timeline">
+          <li class="stop stop-latest">
+            <p class="stop-when"><span class="stop-year">2026</span> <span class="stop-months">Jun&ndash;Sep</span></p>
+            <div class="stop-node"><img class="job-logo" src="logos/roblox_logo.jpg" alt="" width="48" height="48"></div>
+            <div class="stop-body">
+              <h3>Roblox</h3>
               <p class="job-role">Software engineering intern, San Mateo</p>
               <p class="job-summary">Built auto-publish for UGC creators end to end: once moderation approves an item, it lands in the catalog on its own.</p>
               <ul class="job-points">
@@ -82,18 +116,23 @@
                 <li>Built the Temporal workflow and C#/.NET publish activity, with UUIDv5 idempotency keys so Kafka retries never double-publish.</li>
                 <li>Built the React/TypeScript dashboard and REST API for publish defaults and fee consent, shipped behind a staged feature flag.</li>
               </ul>
-              <ul class="chips" aria-label="Tech used">
-                <li>C#/.NET</li><li>gRPC</li><li>Temporal</li><li>Kafka</li><li>Docker</li><li>React</li><li>TypeScript</li>
-              </ul>
+            </div>
+            <ul class="chips stop-stack" aria-label="Tech used"><li>C#/.NET</li><li>gRPC</li><li>Temporal</li><li>Kafka</li><li>Docker</li><li>React</li><li>TypeScript</li></ul>
+          </li>
+          <li class="stop">
+            <p class="stop-when"><span class="stop-year">2025&ndash;26</span> <span class="stop-months">Jun&ndash;Jun</span></p>
+            <div class="stop-node"><img class="job-logo job-logo-dark" src="logos/aiatuci_logo_cropped.png" alt="" width="48" height="48"></div>
+            <div class="stop-body">
+              <h3>AI @ UCI</h3>
+              <p class="job-role">Projects team</p>
+              <p class="job-summary">Designed starter projects for club members to build.</p>
             </div>
           </li>
-          <li class="job">
-            <img class="job-logo" src="logos/ready_tutor_logo.jpg" alt="" width="56" height="56">
-            <div class="job-body">
-              <div class="job-head">
-                <h3>ReadyTutor</h3>
-                <p class="job-when"><time datetime="2025-01">Jan</time>&ndash;<time datetime="2025-04">Apr 2025</time></p>
-              </div>
+          <li class="stop">
+            <p class="stop-when"><span class="stop-year">2025</span> <span class="stop-months">Jan&ndash;Apr</span></p>
+            <div class="stop-node"><img class="job-logo" src="logos/ready_tutor_logo.jpg" alt="" width="48" height="48"></div>
+            <div class="stop-body">
+              <h3>ReadyTutor</h3>
               <p class="job-role">Software engineering intern, Irvine</p>
               <p class="job-summary">Built CourseEater, a UCI course scheduler with 500+ users, on a 10-person team.</p>
               <ul class="job-points">
@@ -101,21 +140,8 @@
                 <li>Integrated the Anteater API for live course data, prerequisite checks, and grade distributions.</li>
                 <li>Cut schedule-building time 30% by tuning frontend rendering and backend queries.</li>
               </ul>
-              <ul class="chips" aria-label="Tech used">
-                <li>MongoDB</li><li>Express</li><li>React</li><li>Redux</li><li>Node.js</li><li>Vite</li>
-              </ul>
             </div>
-          </li>
-          <li class="job">
-            <span class="job-logo job-logo-text" aria-hidden="true">AI</span>
-            <div class="job-body">
-              <div class="job-head">
-                <h3>AI @ UCI</h3>
-                <p class="job-when"><time datetime="2025-06">Jun 2025</time>&ndash;<time datetime="2026-06">Jun 2026</time></p>
-              </div>
-              <p class="job-role">Projects team</p>
-              <p class="job-summary">Designed starter projects for club members to build.</p>
-            </div>
+            <ul class="chips stop-stack" aria-label="Tech used"><li>MongoDB</li><li>Express</li><li>React</li><li>Redux</li><li>Node.js</li><li>Vite</li></ul>
           </li>
         </ol>
       </div>
@@ -126,35 +152,39 @@
         <h2 id="projects-title">projects</h2>
         <div class="projects">
           <article class="project">
-            <div class="project-head">
+            <a class="project-shot" href="https://github.com/an301/papermind">
+              <img src="assets/papermind.jpg" alt="PaperMind reading Attention Is All You Need, with the outline on the left and a question panel on the right" width="1400" height="875" loading="lazy">
+            </a>
+            <div class="project-text">
               <h3>PaperMind</h3>
-              <p class="job-when"><time datetime="2026-02">Feb 2026</time>&ndash;now</p>
+              <p class="project-what">An agent that reads ML papers with you and explains them at your level. Answers cite the exact lines they come from, and it points out the prerequisites you&rsquo;re missing first.</p>
+              <ul class="job-points">
+                <li>Hybrid BM25 + dense retrieval hits 94.8% recall@10 on a 174-question benchmark over 8 papers.</li>
+                <li>Distilled Claude&rsquo;s answers into Mistral 7B with QLoRA SFT, then DPO, served with vLLM. Calibration accuracy went up 18%.</li>
+                <li>A hand-written ReAct loop drives three MCP servers, including a Neo4j graph of 359 ML concepts.</li>
+              </ul>
+              <ul class="chips" aria-label="Tech used">
+                <li>Claude</li><li>FastAPI</li><li>FAISS</li><li>Neo4j</li><li>Redis</li><li>vLLM</li><li>React</li>
+              </ul>
+              <p class="project-links"><a href="https://github.com/an301/papermind">Code on GitHub</a></p>
             </div>
-            <p class="project-what">An agent that reads ML papers with you and explains them at your level. Answers cite the exact lines they come from, and it points out the prerequisites you&rsquo;re missing before it explains.</p>
-            <ul class="job-points">
-              <li>Hybrid BM25 + dense retrieval reaches 94.8% recall@10 on a 174-question benchmark over 8 papers.</li>
-              <li>Distilled Claude&rsquo;s answers into Mistral 7B with QLoRA SFT, then DPO, and served it with vLLM. Calibration accuracy went up 18%.</li>
-              <li>A hand-written ReAct loop drives three MCP servers, including a Neo4j graph of 359 ML concepts.</li>
-            </ul>
-            <ul class="chips" aria-label="Tech used">
-              <li>Claude</li><li>FastAPI</li><li>FAISS</li><li>Neo4j</li><li>Redis</li><li>vLLM</li><li>React</li>
-            </ul>
-            <p class="project-links"><a href="https://github.com/an301/papermind">Code on GitHub</a></p>
           </article>
-          <article class="project">
-            <div class="project-head">
+          <article class="project project-flip">
+            <a class="project-shot" href="https://github.com/rob-9/lumi">
+              <img src="assets/lumi.jpg" alt="A figure Lumi generated: the GLP-1R signaling cascade in neurons next to a heatmap of evidence strength for neuroprotection in Parkinson's disease" width="1400" height="784" loading="lazy">
+            </a>
+            <div class="project-text">
               <h3>Lumi</h3>
-              <p class="job-when"><time datetime="2025-12">Dec 2025</time>&ndash;<time datetime="2026-02">Feb 2026</time></p>
+              <p class="project-what">A multi-agent virtual lab for drug discovery. Specialist agents investigate a research question, and an adversarial review panel scores how confident the findings are before they reach the report. The figure is one Lumi made on its own.</p>
+              <ul class="job-points">
+                <li>Built 4 MCP servers (BioRender, AntV, MockFlow, PyMOL) and 175+ tools across genomics, literature, and chemistry APIs.</li>
+                <li>Low-confidence findings go to human experts over Slack, backed by a SQLite world model that persists across sessions.</li>
+              </ul>
+              <ul class="chips" aria-label="Tech used">
+                <li>Claude</li><li>FastMCP</li><li>Pydantic</li><li>asyncio</li><li>SQLite</li><li>Next.js</li>
+              </ul>
+              <p class="project-links"><a href="https://github.com/rob-9/lumi">Code on GitHub</a></p>
             </div>
-            <p class="project-what">A multi-agent virtual lab for drug discovery. Specialist agents investigate a research question, and an adversarial review panel scores how confident the findings are before they reach the report.</p>
-            <ul class="job-points">
-              <li>Built 4 MCP servers (BioRender, AntV, MockFlow, PyMOL) and 175+ tools across genomics, literature, and chemistry APIs.</li>
-              <li>Low-confidence findings go to human experts over Slack, backed by a SQLite world model that persists across sessions.</li>
-            </ul>
-            <ul class="chips" aria-label="Tech used">
-              <li>Claude</li><li>FastMCP</li><li>Pydantic</li><li>asyncio</li><li>SQLite</li><li>Next.js</li>
-            </ul>
-            <p class="project-links"><a href="https://github.com/rob-9/lumi">Code on GitHub</a></p>
           </article>
         </div>
       </div>
@@ -184,5 +214,6 @@
   </footer>
 
   <script src="koala.js"></script>
+  <script src="badges.js"></script>
 </body>
 </html>
