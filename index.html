@@ -5,8 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anish Nambirajan</title>
   <meta name="description" content="Anish Nambirajan studies computer science at UC Irvine and builds software across the stack. Most recently a software engineering intern at Roblox.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://an301.github.io/personalsite/">
   <meta property="og:title" content="Anish Nambirajan">
   <meta property="og:description" content="Computer science at UC Irvine. Software engineering intern at Roblox, summer 2026.">
+  <meta property="og:image" content="https://an301.github.io/personalsite/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="hi, i'm anish. A pixel koala in a blue and gold jersey dribbling on an outdoor court at dusk.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://an301.github.io/personalsite/og.png">
   <meta name="theme-color" content="#2b3a6b">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +24,7 @@
 </head>
 <body>
   <header class="hero" id="top" data-time="dusk">
-    <canvas id="court" role="img" aria-label="Pixel art of a koala in a blue and gold jersey shooting hoops on an outdoor court. The sky matches the time of day where you are."></canvas>
+    <canvas id="court" role="img" aria-label="Pixel art of a koala in a blue and gold jersey and black Nike GT Cuts, shooting hoops on an outdoor court. The sky matches the time of day where you are."></canvas>
 
     <nav class="nav" aria-label="Sections">
       <a class="nav-name" href="#top">anish nambirajan</a>
@@ -35,7 +43,9 @@
 
     <div class="hero-play">
       <button id="shoot" type="button">Hold to shoot</button>
-      <p id="tally" aria-live="polite">Hold, then let go at the top of the meter.</p>
+      <canvas id="scoreboard" aria-hidden="true"></canvas>
+      <p class="hero-hint">Hold, then let go at the top of the meter.</p>
+      <p id="tally" class="visually-hidden" aria-live="polite"></p>
     </div>
   </header>
 
@@ -47,7 +57,7 @@
             <h2 id="about-title">about</h2>
             <p>I&rsquo;m a CS student at UC Irvine, graduating in 2028. I spent this past summer at Roblox, building the system that publishes a creator&rsquo;s item to the catalog as soon as moderation approves it.</p>
             <p>Most of my free time goes into LLM side projects. Right now that&rsquo;s PaperMind, an agent that explains ML papers at whatever level you&rsquo;re reading at.</p>
-            <p>I mostly write Python, TypeScript, and C#, and I&rsquo;m comfortable in Java, C++, and SQL.</p>
+            <p>When I&rsquo;m not coding, I&rsquo;m probably playing or watching basketball or tennis, or eating something with Nutella on it.</p>
           </div>
           <div class="interests">
             <h3 class="display-heading">lately i&rsquo;m into</h3>
@@ -104,13 +114,24 @@
       <div class="wrap">
         <h2 id="experience-title">experience</h2>
         <ol class="timeline">
-          <li class="stop stop-latest">
+          <li class="stop">
             <p class="stop-when"><span class="stop-year">2026</span> <span class="stop-months">Jun&ndash;Sep</span></p>
             <div class="stop-node"><img class="job-logo" src="logos/roblox_logo.jpg" alt="" width="48" height="48"></div>
             <div class="stop-body">
               <h3>Roblox</h3>
               <p class="job-role">Software engineering intern, San Mateo</p>
               <p class="job-summary">Built auto-publish for UGC creators end to end: once moderation approves an item, it lands in the catalog on its own.</p>
+              <div class="flow" aria-label="How auto-publish works">
+                <ol class="flow-steps">
+                  <li><button type="button" class="flow-step" data-step="studio" data-detail="The creator opts in and agrees to the fee at upload."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Studio</span></button></li>
+                  <li><button type="button" class="flow-step" data-step="review" data-detail="The item gets reviewed and approved."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Moderation</span></button></li>
+                  <li><button type="button" class="flow-step" data-step="event" data-detail="The approval event starts the post-moderation workflow."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Event</span></button></li>
+                  <li><button type="button" class="flow-step" data-step="workflow" data-detail="Temporal runs the publish activity and retries it on transient failures."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Workflow</span></button></li>
+                  <li><button type="button" class="flow-step" data-step="publish" data-detail="Checks opt-in, saved defaults, and the agreed fee, then publishes over gRPC with a UUIDv5 idempotency key, so a redelivered event can never publish twice."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Publish</span></button></li>
+                  <li><button type="button" class="flow-step" data-step="catalog" data-detail="The item goes on sale and the creator gets a message."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Catalog</span></button></li>
+                </ol>
+                <p class="flow-detail" aria-live="polite">Hover a step to see what it does.</p>
+              </div>
               <ul class="job-points">
                 <li>Designed and deployed a Dockerized gRPC service for creator publish preferences and per-item opt-ins.</li>
                 <li>Built the Temporal workflow and C#/.NET publish activity, with UUIDv5 idempotency keys so Kafka retries never double-publish.</li>
@@ -144,6 +165,7 @@
             <ul class="chips stop-stack" aria-label="Tech used"><li>MongoDB</li><li>Express</li><li>React</li><li>Redux</li><li>Node.js</li><li>Vite</li></ul>
           </li>
         </ol>
+
       </div>
     </section>
 
@@ -209,11 +231,15 @@
   <footer class="footer">
     <div class="wrap footer-row">
       <p>Anish Nambirajan, 2026</p>
-      <p class="footer-egg"><span aria-hidden="true">&uarr;&uarr;&darr;&darr;&larr;&rarr;&larr;&rarr;BA</span> <span class="visually-hidden">Try the Konami code on the court.</span> Press T on the court to change the time of day.</p>
+      <ul class="footer-eggs">
+        <li><span class="keys" aria-label="The Konami code"><kbd>&uarr;</kbd><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd><kbd>B</kbd><kbd>A</kbd></span><span>on the court</span></li>
+        <li><span class="keys"><kbd>T</kbd></span><span>changes the time of day</span></li>
+      </ul>
     </div>
   </footer>
 
   <script src="koala.js"></script>
   <script src="badges.js"></script>
+  <script src="flow.js"></script>
 </body>
 </html>

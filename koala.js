@@ -71,6 +71,8 @@
   const KOALA = {
     k: '#363445', g: '#9b9ba9', w: '#eceaf0', p: '#e9c7cf', n: '#2a2834', m: '#5e5b6d',
     e: '#1d1b27', f: '#5f5e6e', j: '#f4c542', J: '#d6a52c', b: '#1f5fa6', s: '#1f5fa6',
+    // Black Nike GT Cuts: black upper, silver swoosh, silver midsole streak.
+    x: '#18181f', z: '#d7dae3', v: '#9ba1ae',
   };
   const BALL = { q: '#5c2a14', o: '#e06a2c', O: '#f39b5c', r: '#b54c1f', s: '#8a3918' };
   const GREEN = '#3ddc6a';
@@ -127,10 +129,10 @@
   const LEG_ROWS = {
     split: '...kssssskksssssk...',
     leg: '...kggggk..kggggk...',
-    foot: '..kfffffk..kfffffk..',
-    sole: '..kkkkkkk..kkkkkkk..',
-    toe: '...kffffk..kffffk...',
-    toeSole: '....kkkk....kkkk....',
+    foot: '..kxzzxxk..kxxzzxk..',
+    sole: '..kvvvvvk..kvvvvvk..',
+    toe: '...kxzxxk..kxxzxk...',
+    toeSole: '....kvvk....kvvk....',
   };
   const LEGS = {
     stand: sprite([LEG_ROWS.split, LEG_ROWS.leg, LEG_ROWS.foot, LEG_ROWS.sole], KOALA),
@@ -174,7 +176,14 @@
     U: ['#.#', '#.#', '#.#', '#.#', '###'], V: ['#.#', '#.#', '#.#', '#.#', '.#.'],
     W: ['#.#', '#.#', '###', '###', '#.#'], X: ['#.#', '#.#', '.#.', '#.#', '#.#'],
     Y: ['#.#', '#.#', '.#.', '.#.', '.#.'], Z: ['###', '..#', '.#.', '#..', '###'],
+    P: ['##.', '#.#', '##.', '#..', '#..'],
     '!': ['.#.', '.#.', '.#.', '...', '.#.'], ' ': ['...', '...', '...', '...', '...'],
+    0: ['###', '#.#', '#.#', '#.#', '###'], 1: ['.#.', '##.', '.#.', '.#.', '###'],
+    2: ['##.', '..#', '.#.', '#..', '###'], 3: ['##.', '..#', '.#.', '..#', '##.'],
+    4: ['#.#', '#.#', '###', '..#', '..#'], 5: ['###', '#..', '##.', '..#', '##.'],
+    6: ['.##', '#..', '###', '#.#', '###'], 7: ['###', '..#', '.#.', '.#.', '.#.'],
+    8: ['###', '#.#', '###', '#.#', '###'], 9: ['###', '#.#', '###', '..#', '##.'],
+    '-': ['...', '...', '###', '...', '...'], '%': ['#.#', '..#', '.#.', '#..', '#.#'],
   };
   const textWidth = (s) => s.length * 4 - 1;
 
@@ -319,6 +328,7 @@
     canvas.style.width = `${w * scale}px`;
     canvas.style.height = `${h * scale}px`;
     ctx.imageSmoothingEnabled = false;
+    boardScale = W >= 640 ? 3 : 2;
     paintScenery();
   }
 
@@ -565,8 +575,8 @@
     green: { label: 'EXCELLENT', color: GREEN, make: 1, miss: 0 },
     early: { label: 'SLIGHTLY EARLY', color: '#f4f5fa', make: 0.45, miss: -1 },
     late: { label: 'SLIGHTLY LATE', color: '#f4f5fa', make: 0.45, miss: 1 },
-    veryEarly: { label: 'VERY EARLY', color: '#ff7a6b', make: 0.06, miss: -2 },
-    veryLate: { label: 'VERY LATE', color: '#ff7a6b', make: 0.06, miss: 2 },
+    veryEarly: { label: 'VERY EARLY', color: '#ff7a6b', make: 0, miss: -2 },
+    veryLate: { label: 'VERY LATE', color: '#ff7a6b', make: 0, miss: 2 },
   };
 
   function gradeFor(f) {
@@ -598,6 +608,7 @@
   let attempts = 0;
   let greens = 0;
   let greenRun = 0;
+  let makeRun = 0;
   let onFire = false;
 
   // Derived each frame by stepKoala().
@@ -641,6 +652,62 @@
     if (greens) s += `, ${greens} green${greens === 1 ? '' : 's'}`;
     if (onFire) s += '. On fire';
     tally.textContent = `${s}.`;
+    if (hint && attempts) hint.hidden = true;
+  }
+
+  // Arcade scoreboard next to the button. A cell blinks when its value changes.
+  const board = document.getElementById('scoreboard');
+  const bctx = board ? board.getContext('2d') : null;
+  const hint = document.querySelector('.hero-hint');
+  let boardScale = 3;
+  const boardLast = {};
+  const boardFlash = {};
+
+  function drawBoard() {
+    if (!bctx) return;
+    const pct = attempts ? Math.round((100 * makes) / attempts) : 0;
+    const cells = [
+      { key: 'fg', label: 'FG', value: `${makes}-${attempts}`, color: '#fff4e8', min: 19 },
+      { key: 'pct', label: 'PCT', value: `${pct}%`, color: '#f4c542', min: 15 },
+      { key: 'streak', label: onFire ? 'FIRE' : 'STREAK', value: String(makeRun), color: onFire ? '#ffb347' : '#fff4e8', min: 7 },
+    ];
+    for (const c of cells) {
+      if (boardLast[c.key] !== undefined && boardLast[c.key] !== c.value) boardFlash[c.key] = 24;
+      boardLast[c.key] = c.value;
+      c.w = Math.max(textWidth(c.label), textWidth(c.value), c.min) + 6;
+    }
+    const W = cells.reduce((a, c) => a + c.w, 0) + cells.length + 1;
+    const H = 15;
+    if (board.width !== W || board.dataset.scale !== String(boardScale)) {
+      board.width = W;
+      board.height = H;
+      board.style.width = `${W * boardScale}px`;
+      board.style.height = `${H * boardScale}px`;
+      board.dataset.scale = String(boardScale);
+    }
+    bctx.clearRect(0, 0, W, H);
+    bctx.fillStyle = '#141a33';
+    bctx.fillRect(1, 0, W - 2, H);
+    bctx.fillRect(0, 1, W, H - 2);
+    let x = 1;
+    cells.forEach((c, i) => {
+      const f = boardFlash[c.key] || 0;
+      if (f > 0) {
+        boardFlash[c.key] = f - 1;
+        if ((f >> 2) & 1) {
+          bctx.fillStyle = '#222b52';
+          bctx.fillRect(x, 1, c.w, H - 2);
+        }
+      }
+      pixelText(bctx, c.label, x + Math.floor((c.w - textWidth(c.label)) / 2), 2, '#8f9bcc');
+      pixelText(bctx, c.value, x + Math.floor((c.w - textWidth(c.value)) / 2), 8, f > 0 && ((f >> 2) & 1) ? '#ffffff' : c.color);
+      x += c.w;
+      if (i < cells.length - 1) {
+        bctx.fillStyle = '#2a3150';
+        bctx.fillRect(x, 2, 1, H - 4);
+        x += 1;
+      }
+    });
   }
 
   function resetBall() {
@@ -716,6 +783,7 @@
     ball.missed = false;
     ball.flight = 0;
     ball.green = grade === GRADES.green;
+    ball.noScore = !make;
     ball.dunk = false;
     ball.trail = [];
     attempts++;
@@ -884,6 +952,7 @@
     ball.flight = 0;
     ball.green = false;
     ball.dunk = true;
+    ball.noScore = false;
     ball.trail = [];
     attempts++;
     say('SLAM DUNK', '#f4c542');
@@ -981,9 +1050,16 @@
     }
 
     const inRim = ball.x > L.rimX0 + 1 && ball.x < L.rimX1 - 1;
-    if (!ball.scored && ball.vy > 0 && prevY < L.rimY + 1 && ball.y >= L.rimY + 1 && inRim) {
+    const dropping = ball.vy > 0 && prevY < L.rimY + 1 && ball.y >= L.rimY + 1 && inRim;
+    if (dropping && ball.noScore && !ball.scored) {
+      // A late or early release that drifts over the rim rattles out instead of falling in.
+      ball.y = L.rimY - 2;
+      ball.vy = -Math.abs(ball.vy) * 0.45 - 0.6;
+      ball.vx = (ball.x < rimMid() ? -1 : 1) * (0.7 + Math.random() * 0.5);
+    } else if (!ball.scored && dropping) {
       ball.scored = true;
       makes++;
+      makeRun++;
       net.v += ball.dunk ? 0.6 : ball.green ? 0.45 : 0.32;
       if (ball.green) burst(rimMid(), L.rimY + 4, [GREEN, GREEN_LIGHT, '#ffffff'], 14, 1.2);
       if (!ball.dunk) koala.cheer = 30;
@@ -999,6 +1075,8 @@
       ball.y = floor;
       if (!ball.scored && !ball.missed) {
         ball.missed = true;
+        makeRun = 0;
+        updateTally();
         if (koala.state === 'watch') koala.shake = 24;
       }
       if (ball.vy > 0.8) {
@@ -1211,6 +1289,7 @@
     drawEffects();
     drawMeter();
     drawLabel();
+    drawBoard();
   }
 
   // Night scene: a koala asleep on its ball under a streetlight ---------------

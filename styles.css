@@ -249,9 +249,22 @@ dd {
   color: var(--ink);
 }
 
-#tally {
+#scoreboard {
+  display: block;
+  flex: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.hero-hint {
   color: var(--muted);
   line-height: 1.35;
+}
+
+@media (max-width: 34rem) {
+  .hero-hint {
+    display: none;
+  }
 }
 
 /* Bands ----------------------------------------------------------------- */
@@ -422,16 +435,12 @@ dd {
   position: relative;
 }
 
-/* A frame around each logo; the newest stop's frame is gold. */
+/* A frame around each logo. */
 .stop-node .job-logo {
   box-sizing: content-box;
   padding: 4px;
   background-color: var(--dusk-raised);
   background-clip: border-box;
-}
-
-.stop-latest .stop-node .job-logo {
-  background-color: var(--gold);
 }
 
 /* Solid rail from this logo down to the next one. Nothing after the last. */
@@ -571,6 +580,101 @@ dd {
   clip-path: var(--px2);
 }
 
+/* Auto-publish flow, inside the Roblox stop ----------------------------- */
+
+.flow {
+  margin-top: 1rem;
+}
+
+.flow-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 36rem) {
+  .flow-steps {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.flow-steps li {
+  position: relative;
+}
+
+/* Thin rail from each step to the next. */
+.flow-steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: calc(50% + 20px);
+  right: calc(-50% + 20px - 0.5rem);
+  height: 2px;
+  background: #4a5a92;
+}
+
+@media (max-width: 35.99rem) {
+  .flow-steps li:nth-child(3)::after {
+    display: none;
+  }
+}
+
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--haze);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: default;
+}
+
+.flow-step canvas {
+  display: block;
+  box-sizing: content-box;
+  width: 24px;
+  height: 24px;
+  padding: 6px;
+  background: var(--dusk-raised);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  clip-path: var(--px2);
+  transition: background-color 150ms ease;
+}
+
+.flow-step:hover,
+.flow-step:focus-visible,
+.flow-step.is-on {
+  color: var(--glow);
+}
+
+.flow-step:hover canvas,
+.flow-step:focus-visible canvas,
+.flow-step.is-on canvas {
+  background: var(--ball);
+}
+
+.flow-step:focus-visible {
+  outline: none;
+}
+
+.flow-detail {
+  min-height: 2.9em;
+  margin-top: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--haze);
+}
+
 /* Projects -------------------------------------------------------------- */
 
 .band-twilight {
@@ -691,7 +795,7 @@ dd {
 /* Footer ---------------------------------------------------------------- */
 
 .footer {
-  padding: 1.5rem 0 2rem;
+  padding: 2rem 0 2.5rem;
   background: #1c2347;
   color: var(--haze);
   font-size: 0.875rem;
@@ -701,9 +805,49 @@ dd {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.5rem 2rem;
+  align-items: center;
+  gap: 1.25rem 3rem;
 }
 
-.footer-egg {
-  opacity: 0.7;
+.footer-eggs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-eggs li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Keyboard tricks mean nothing on a phone. */
+@media (hover: none) and (pointer: coarse) {
+  .footer-eggs {
+    display: none;
+  }
+}
+
+.keys {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.footer kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.35rem;
+  background: #2a3260;
+  color: var(--glow);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  clip-path: var(--px2);
 }
