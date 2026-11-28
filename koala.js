@@ -1,59 +1,48 @@
-// Pixel court with a koala shooting around, plus a sleepy koala at the bottom
-// of the page. Everything is drawn at low resolution and scaled up by a whole
-// number with `image-rendering: pixelated`, so every art pixel stays square.
+// A court with a koala shooting around. The scene is drawn as pixel art into
+// a small offscreen buffer, then printed onto the visible canvas as a
+// halftone: one dot per art pixel, sized by how dark that pixel is (or, on
+// the night page, how light). The ball, the rim, and a perfect release keep a
+// color. The time of day here is also the whole page's theme.
 (() => {
   'use strict';
 
-  const canvas = document.getElementById('court');
-  if (!canvas) return;
-  const hero = canvas.closest('.hero');
-  const ctx = canvas.getContext('2d', { alpha: false });
-  const nightCanvas = document.getElementById('night');
+  const view = document.getElementById('court');
+  if (!view) return;
+  const hero = view.closest('.hero');
+  const vctx = view.getContext('2d');
+  const orbEl = hero.querySelector('.orb');
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
   const shootBtn = document.getElementById('shoot');
   const tally = document.getElementById('tally');
-  const themeMeta = document.querySelector('meta[name="theme-color"]');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
 
   // Palettes ---------------------------------------------------------------
 
-  // The court, hoop and koala never change. The sky and scenery follow the
-  // visitor's local time.
+  // Scenery is specified as an amount of ink, from 0 (bare paper) to 1. An
+  // amount is written into the buffer as a marker color, rgb(2, n, 1), so the
+  // dot printer can tell it from the koala's own colors, which print by
+  // their lightness instead.
+  const LEVELS = 12; // dot sizes
+  const tone = (t) => `rgb(2,${Math.round(t * LEVELS) * 20},1)`;
+  const HOT = '#e06a2c'; // prints in the accent color
+
   const C = {
-    curb: '#c3c8d4', court: '#e7e9ee', paint: '#dfe2e9', line: '#cdd2dc', shadow: '#cdd1dc',
-    pole: '#283152', board: '#f6f4f8', rim: '#e0582a', rimDark: '#a63c1c', net: '#f8f6fa',
-    lamp: '#f8e6a6', lampGlow: '#f3efe2',
+    curb: tone(0.3), court: tone(0), paint: tone(0.08), line: tone(0.3), shadow: tone(0.3),
+    pole: tone(0.9), board: tone(0.12), rim: '#e0582a', rimDark: '#a63c1c', net: tone(0.55),
+    lamp: tone(1), lampGlow: tone(0.16),
+    cloud: tone(0.14), cloudLit: tone(0.3),
+    hillFar: 0.16, hillNear: 0.3, tree: tone(0.8), treeLit: tone(0.5), bark: tone(0.4), grass: 0.6,
   };
 
+  // The sky is bare paper. Each time of day sets the sun or moon, the stars,
+  // and how strong the haze above the horizon is.
   const TIMES = {
-    dawn: {
-      sky: ['#3b4a7e', '#55639a', '#7d84b3', '#a99bc0', '#d3a8bd', '#eebdb6', '#f6cfb0', '#f9dfb6', '#fbecc8'],
-      orb: { x: 0.24, low: 4, r: 8, core: '#fff3da', edge: '#fde6b8', halo: '#fbe7c4' },
-      stars: 0.015, starTop: 0.3,
-      cloud: '#dba9b9', cloudLit: '#fbdcc2',
-      hillFar: '#8c88b0', hillNear: '#6f739f', tree: '#3a5866', treeLit: '#55787f', bark: '#d6ccd0', grass: '#3c5d63',
-    },
-    day: {
-      sky: ['#4f86c9', '#5a90d0', '#669bd6', '#74a6dc', '#84b2e1', '#95bee6', '#a8cae9', '#bcd6ec', '#d2e3ef'],
-      orb: { x: 0.72, y: 0.2, r: 7, core: '#fffbe8', edge: '#fff0bf', halo: '#a9cdef' },
-      stars: 0, starTop: 0,
-      cloud: '#f6f8fc', cloudLit: '#d3dff0',
-      hillFar: '#86a3c6', hillNear: '#6a8cae', tree: '#2f5a4e', treeLit: '#4b7a64', bark: '#ddd6d2', grass: '#47775a',
-    },
-    dusk: {
-      sky: ['#2b3a6b', '#33457a', '#41538a', '#56659b', '#7a7cab', '#a68aab', '#d29ca3', '#eeb8a2', '#f8d6b2'],
-      orb: { x: 0.4, low: 7, r: 9, core: '#fff0d2', edge: '#fde2b6', halo: '#fbe0bd' },
-      stars: 0.06, starTop: 0.38,
-      cloud: '#c995ab', cloudLit: '#efbcae',
-      hillFar: '#6d6f9f', hillNear: '#535b8b', tree: '#2f4c5a', treeLit: '#456b74', bark: '#cdc4cb', grass: '#30505a',
-    },
-    night: {
-      sky: ['#0d1230', '#101737', '#141c40', '#182148', '#1c2650', '#212b58', '#26315f', '#2c3767', '#323e70'],
-      orb: { x: 0.8, y: 0.2, r: 6, core: '#f3eedc', edge: '#d9d4c3', halo: '#26305c', moon: true },
-      stars: 0.2, starTop: 0.75,
-      cloud: '#232c58', cloudLit: '#323d6e',
-      hillFar: '#1f2850', hillNear: '#182040', tree: '#0f1a26', treeLit: '#1c2e3b', bark: '#6e6a7a', grass: '#132530',
-      lamp: true,
-    },
+    dawn: { haze: 0.22, orb: { x: 0.2, low: 4, r: 8 }, stars: 0.015, starTop: 0.3 },
+    day: { haze: 0, orb: { x: 0.72, y: 0.24, r: 7 }, stars: 0, starTop: 0 },
+    dusk: { haze: 0.34, orb: { x: 0.2, low: 7, r: 9 }, stars: 0.06, starTop: 0.38 },
+    night: { haze: 0, orb: { x: 0.8, y: 0.24, r: 6 }, stars: 0.2, starTop: 0.75, lamp: true },
   };
   const TIME_ORDER = ['dawn', 'day', 'dusk', 'night'];
 
@@ -77,6 +66,7 @@
   const BALL = { q: '#5c2a14', o: '#e06a2c', O: '#f39b5c', r: '#b54c1f', s: '#8a3918' };
   const GREEN = '#3ddc6a';
   const GREEN_LIGHT = '#c8ffd9';
+  const ORB = '#ff00ff'; // never shown; marks where the sun or moon goes
 
   // Sprites ----------------------------------------------------------------
 
@@ -153,15 +143,6 @@
       if (x + y >= 7) return 'r';
       return 'o';
     }).join('')), BALL));
-
-  const HEART = sprite([
-    '.kk.kk.',
-    'krrkrrk',
-    'krrrrrk',
-    '.krrrk.',
-    '..krk..',
-    '...k...',
-  ], { k: '#3a1f33', r: '#ff6f91' });
 
   // 3x5 pixel font for the meter feedback and little callouts.
   const GLYPHS = {
@@ -292,6 +273,7 @@
 
   // Layout -----------------------------------------------------------------
 
+  const ART_H = 96;
   let L = null;
   let bg = null; // sky, sun or moon, stars
   let fg = null; // hills, trees, court, hoop
@@ -300,11 +282,10 @@
 
   function layout() {
     const W = hero.clientWidth;
-    const H = hero.clientHeight;
-    const scale = Math.max(2, Math.min(Math.round(H / 190), Math.floor(W / 130)));
-    const w = Math.ceil(W / scale);
-    const h = Math.ceil(H / scale);
-    const groundY = h - (16 + Math.ceil(56 / scale)); // leave room for the button row
+    const scale = W >= 640 ? 4 : 3; // dot pitch in CSS pixels
+    const w = Math.floor(W / scale);
+    const h = ART_H;
+    const groundY = h - 21;
     const floorY = groundY + 9;
     const boardX = w - Math.max(10, Math.round(w * 0.07));
     const rimY = floorY - 44;
@@ -325,22 +306,21 @@
 
     canvas.width = w;
     canvas.height = h;
-    canvas.style.width = `${w * scale}px`;
-    canvas.style.height = `${h * scale}px`;
     ctx.imageSmoothingEnabled = false;
-    boardScale = W >= 640 ? 3 : 2;
+    layoutDots();
     paintScenery();
+  }
+
+  // Scenery thins out toward the left and right edges of the picture.
+  function edge(px) {
+    const side = Math.min(20, L.w * 0.12);
+    return ease(Math.min(1, (px + 0.5) / side, (L.w - px - 0.5) / side));
   }
 
   function paintScenery() {
     bg = paintSky();
     fg = paintGround();
     clouds = makeClouds();
-  }
-
-  function skyBand(y) {
-    const n = P.sky.length - 1;
-    return P.sky[Math.min(n, Math.floor(Math.pow(Math.min(1, Math.max(0, y) / L.horizon), 1.35) * n))];
   }
 
   function paintSky() {
@@ -350,20 +330,18 @@
     c.height = h;
     const x = c.getContext('2d');
     const img = x.createImageData(w, h);
-    const cols = P.sky.map(rgb);
-    const n = cols.length - 1;
-
     for (let y = 0; y < h; y++) {
-      const t = Math.pow(Math.min(1, y / horizon), 1.35) * n;
-      const band = Math.floor(t);
-      const frac = t - band;
+      const haze = y < horizon ? P.haze * Math.pow(y / horizon, 3) : 0;
       for (let px = 0; px < w; px++) {
-        // Dither only the last stretch of each band into the next one.
-        let i = band;
-        if (frac > 0.62 && (frac - 0.62) / 0.38 > BAYER[y & 3][px & 3] / 16) i = band + 1;
-        const col = cols[Math.min(i, n)];
+        // Between two dot sizes, dither, so the haze thins out instead of
+        // stopping at a line.
+        const v = haze * edge(px) * LEVELS;
+        const level = Math.floor(v) + (v - Math.floor(v) > (BAYER[y & 3][px & 3] + 0.5) / 16 ? 1 : 0);
         const o = (y * w + px) * 4;
-        img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2]; img.data[o + 3] = 255;
+        img.data[o] = 2;
+        img.data[o + 1] = level * 20;
+        img.data[o + 2] = 1;
+        img.data[o + 3] = 255;
       }
     }
     x.putImageData(img, 0, 0);
@@ -376,32 +354,28 @@
       const sx = Math.floor(rand() * w);
       const sy = Math.floor(rand() * horizon * P.starTop);
       if (i % 7 === 0) { twinkles.push({ x: sx, y: sy, phase: rand() * 6.3 }); continue; }
-      x.fillStyle = rand() < 0.3 ? '#dfe4f7' : '#8f9bcc';
+      x.fillStyle = rand() < 0.3 ? tone(1) : tone(0.5);
       x.fillRect(sx, sy, 1, 1);
     }
 
+    // The sun or moon is a flat disc behind the canvas. Here it only punches
+    // a hole in the sky dots, so hills and clouds still print over it.
     const o = P.orb;
-    const sx = Math.round(w * o.x);
-    const sy = o.low ? horizon - o.low : Math.round(horizon * o.y);
     const r = o.r;
-    for (let dy = -r - 6; dy <= r + 6; dy++) {
-      for (let dx = -r - 6; dx <= r + 6; dx++) {
-        const d = Math.hypot(dx, dy);
-        if (d > r && d <= r + 6 && BAYER[(sy + dy) & 3][(sx + dx) & 3] / 16 < 0.55 * (1 - (d - r) / 6)) {
-          x.fillStyle = o.halo;
-          x.fillRect(sx + dx, sy + dy, 1, 1);
-        }
-      }
+    let sx = Math.round(w * o.x);
+    // A low sun stays clear of the koala on narrow screens.
+    if (o.low) sx = Math.max(r + 2, Math.min(sx, L.kx - r - 4));
+    const sy = o.low ? horizon - o.low : Math.round(horizon * o.y);
+    disc(x, sx, sy, r, ORB);
+    if (orbEl) {
+      const s = L.scale;
+      orbEl.style.width = orbEl.style.height = `${(2 * r + 1) * s}px`;
+      orbEl.style.left = `${(sx - r) * s}px`;
+      orbEl.style.top = `${(sy - r) * s}px`;
     }
-    disc(x, sx, sy, r, o.edge);
-    disc(x, sx, sy, r - 1, o.core);
-    if (o.moon) {
-      // Carve a crescent with the sky behind it, then add two craters.
-      disc(x, sx + 3, sy - 2, r - 1, skyBand(sy - 2));
-      x.fillStyle = o.edge;
-      x.fillRect(sx - 3, sy + 1, 1, 1);
-      x.fillRect(sx - 1, sy + 3, 2, 1);
-    }
+    // The glow behind the hills rises from wherever the sun or moon is.
+    hero.style.setProperty('--horizon', `${(L.groundY - 1) * L.scale}px`);
+    hero.style.setProperty('--glow-x', `${Math.round((100 * sx) / w)}%`);
     return c;
   }
 
@@ -415,19 +389,19 @@
     // Pale eucalyptus trunk with two branches.
     for (let y = base; y >= top + 4; y--) {
       const sway = Math.round(Math.sin((base - y) * 0.13) * 1.2);
-      c.fillStyle = P.bark;
+      c.fillStyle = C.bark;
       c.fillRect(x0 + sway, y, 2, 1);
     }
-    line(c, x0 + 1, fork, x0 + 8, fork - 9, 1, 0, P.bark);
-    line(c, x0, fork + 3, x0 - 6, fork - 5, 1, 0, P.bark);
+    line(c, x0 + 1, fork, x0 + 8, fork - 9, 1, 0, C.bark);
+    line(c, x0, fork + 3, x0 - 6, fork - 5, 1, 0, C.bark);
 
     const clumps = [
       [x0 + 1, top + 2, 6], [x0 - 4, top + 5, 5], [x0 + 6, top + 4, 5],
       [x0 + 9, fork - 10, 4], [x0 - 7, fork - 6, 4],
     ];
-    for (const [cx, cy, r] of clumps) disc(c, cx, cy, r, P.tree);
+    for (const [cx, cy, r] of clumps) disc(c, cx, cy, r, C.tree);
     // Light catches the upper left of each clump.
-    c.fillStyle = P.treeLit;
+    c.fillStyle = C.treeLit;
     for (const [cx, cy, r] of clumps) {
       for (let k = 0; k < r * 3; k++) {
         const a = Math.PI * (1 + rand() * 0.6);
@@ -447,9 +421,11 @@
     for (let px = 0; px < w; px++) {
       const far = hillLine(px, horizon - 9, 5, 0.045, 0.11, 1);
       const near = hillLine(px, horizon - 2, 3, 0.07, 0.19, 4);
-      x.fillStyle = P.hillFar;
+      // Lighter hills at night, so the koala stands clear of them.
+      const dim = timeKey === 'night' ? 0.6 : 1;
+      x.fillStyle = tone(C.hillFar * dim * edge(px));
       x.fillRect(px, far, 1, groundY - far);
-      x.fillStyle = P.hillNear;
+      x.fillStyle = tone(C.hillNear * dim * edge(px));
       x.fillRect(px, near, 1, groundY - near);
     }
 
@@ -461,11 +437,13 @@
     });
 
     // Grass verge with a few shrubs, then the curb, then the court.
-    x.fillStyle = P.grass;
-    x.fillRect(0, groundY - 1, w, 3);
-    for (let px = 2; px < w; px += 9 + Math.floor(rand() * 9)) disc(x, px, groundY - 1, 2 + Math.floor(rand() * 2), P.grass);
-    x.fillStyle = C.curb;
-    x.fillRect(0, groundY + 2, w, 1);
+    for (let px = 2; px < w; px += 9 + Math.floor(rand() * 9)) disc(x, px, groundY - 1, 2 + Math.floor(rand() * 2), tone(C.grass * edge(px)));
+    for (let px = 0; px < w; px++) {
+      x.fillStyle = tone(C.grass * edge(px));
+      x.fillRect(px, groundY - 1, 1, 3);
+      x.fillStyle = tone(0.3 * edge(px));
+      x.fillRect(px, groundY + 2, 1, 1);
+    }
     x.fillStyle = C.court;
     x.fillRect(0, groundY + 3, w, h - groundY - 3);
 
@@ -478,23 +456,15 @@
       x.fillStyle = C.line;
       x.fillRect(keyX + lean, y, 1, 1);
     }
-    x.fillStyle = C.line;
-    x.fillRect(0, ballFloor + 6, w, 1);
+    for (let px = 0; px < w; px++) {
+      x.fillStyle = tone(0.3 * edge(px));
+      x.fillRect(px, ballFloor + 6, 1, 1);
+    }
 
     // A streetlight behind the koala at night, with a pool of light.
     if (P.lamp && kx - 22 > 6) {
       const lx = kx - 22;
       const headY = floorY - 46;
-      for (let y = headY + 3; y <= floorY + 1; y++) {
-        const spread = (y - headY) * 0.5;
-        for (let px = Math.floor(lx + 6 - spread); px <= lx + 6 + spread; px++) {
-          const fall = 1 - Math.abs(px - lx - 6) / (spread + 1);
-          if (BAYER[y & 3][px & 3] / 16 < fall * 0.22 && y < groundY - 1) {
-            x.fillStyle = 'rgba(248,230,166,0.16)';
-            x.fillRect(px, y, 1, 1);
-          }
-        }
-      }
       for (let y = groundY + 3; y <= ballFloor + 5; y++) {
         const rx = 22 - Math.abs(y - floorY) * 1.4;
         for (let px = Math.round(lx + 6 - rx); px <= lx + 6 + rx; px++) {
@@ -541,25 +511,31 @@
       // Puffs are biggest in the middle and taper toward the ends.
       for (let px = 3; px < cw - 3; px += 2 + Math.floor(rand() * 3)) {
         const r = Math.max(1, Math.round(1 + 4 * Math.sin((Math.PI * px) / cw) + rand() * 1.5));
-        disc(x, px, base - Math.round(r * 0.5), r, P.cloud);
+        disc(x, px, base - Math.round(r * 0.5), r, C.cloud);
       }
       x.clearRect(0, base + 1, cw, ch);
       x.globalCompositeOperation = 'source-atop';
-      x.fillStyle = P.cloudLit;
+      x.fillStyle = C.cloudLit;
       x.fillRect(0, base - 1, cw, 2);
       return { img: c, x: fx * w, y: Math.round(fy * horizon), w: cw };
     });
   }
 
+  const skyNote = document.getElementById('sky');
+
   function setTime(key, announce) {
     timeKey = key;
     P = TIMES[key];
-    hero.dataset.time = key;
-    hero.style.backgroundColor = P.sky[0];
-    if (themeMeta) themeMeta.content = P.sky[0];
+    // The whole page takes its colors from the time of day (see styles.css).
+    document.documentElement.dataset.time = key;
+    readTheme();
+    if (skyNote) {
+      const name = key[0].toUpperCase() + key.slice(1);
+      skyNote.textContent = key === timeForHour(new Date().getHours()) ? `${name} where you are.` : `${name}.`;
+    }
     if (!L) return;
     paintScenery();
-    if (announce) say(key.toUpperCase(), '#f4f5fa');
+    if (announce) say(key.toUpperCase(), tone(1));
     draw();
     start();
   }
@@ -573,10 +549,10 @@
 
   const GRADES = {
     green: { label: 'EXCELLENT', color: GREEN, make: 1, miss: 0 },
-    early: { label: 'SLIGHTLY EARLY', color: '#f4f5fa', make: 0.45, miss: -1 },
-    late: { label: 'SLIGHTLY LATE', color: '#f4f5fa', make: 0.45, miss: 1 },
-    veryEarly: { label: 'VERY EARLY', color: '#ff7a6b', make: 0, miss: -2 },
-    veryLate: { label: 'VERY LATE', color: '#ff7a6b', make: 0, miss: 2 },
+    early: { label: 'SLIGHTLY EARLY', color: tone(1), make: 0.45, miss: -1 },
+    late: { label: 'SLIGHTLY LATE', color: tone(1), make: 0.45, miss: 1 },
+    veryEarly: { label: 'VERY EARLY', color: tone(1), make: 0, miss: -2 },
+    veryLate: { label: 'VERY LATE', color: tone(1), make: 0, miss: 2 },
   };
 
   function gradeFor(f) {
@@ -602,7 +578,6 @@
   const pointer = { x: 0, y: 0, idle: 0 };
   let particles = [];
   let rings = [];
-  let hearts = [];
   let label = null;
   let makes = 0;
   let attempts = 0;
@@ -647,67 +622,29 @@
     }
   }
 
+  const score = document.getElementById('score');
+  const hint = document.querySelector('.hero-hint');
+
+  // The best streak is kept on this device, so there's something to beat.
+  let best = 0;
+  try { best = Math.max(0, parseInt(localStorage.getItem('best-streak'), 10) || 0); } catch { /* storage blocked */ }
+
+  function showScore() {
+    if (score) score.textContent = `fg ${makes}-${attempts}  ${onFire ? 'on fire' : 'streak'} ${makeRun}  best ${best}`;
+  }
+  showScore();
+
   function updateTally() {
+    if (makeRun > best) {
+      best = makeRun;
+      try { localStorage.setItem('best-streak', String(best)); } catch { /* storage blocked */ }
+    }
+    showScore();
     let s = `Made ${makes} of ${attempts}`;
     if (greens) s += `, ${greens} green${greens === 1 ? '' : 's'}`;
     if (onFire) s += '. On fire';
     tally.textContent = `${s}.`;
     if (hint && attempts) hint.hidden = true;
-  }
-
-  // Arcade scoreboard next to the button. A cell blinks when its value changes.
-  const board = document.getElementById('scoreboard');
-  const bctx = board ? board.getContext('2d') : null;
-  const hint = document.querySelector('.hero-hint');
-  let boardScale = 3;
-  const boardLast = {};
-  const boardFlash = {};
-
-  function drawBoard() {
-    if (!bctx) return;
-    const pct = attempts ? Math.round((100 * makes) / attempts) : 0;
-    const cells = [
-      { key: 'fg', label: 'FG', value: `${makes}-${attempts}`, color: '#fff4e8', min: 19 },
-      { key: 'pct', label: 'PCT', value: `${pct}%`, color: '#f4c542', min: 15 },
-      { key: 'streak', label: onFire ? 'FIRE' : 'STREAK', value: String(makeRun), color: onFire ? '#ffb347' : '#fff4e8', min: 7 },
-    ];
-    for (const c of cells) {
-      if (boardLast[c.key] !== undefined && boardLast[c.key] !== c.value) boardFlash[c.key] = 24;
-      boardLast[c.key] = c.value;
-      c.w = Math.max(textWidth(c.label), textWidth(c.value), c.min) + 6;
-    }
-    const W = cells.reduce((a, c) => a + c.w, 0) + cells.length + 1;
-    const H = 15;
-    if (board.width !== W || board.dataset.scale !== String(boardScale)) {
-      board.width = W;
-      board.height = H;
-      board.style.width = `${W * boardScale}px`;
-      board.style.height = `${H * boardScale}px`;
-      board.dataset.scale = String(boardScale);
-    }
-    bctx.clearRect(0, 0, W, H);
-    bctx.fillStyle = '#141a33';
-    bctx.fillRect(1, 0, W - 2, H);
-    bctx.fillRect(0, 1, W, H - 2);
-    let x = 1;
-    cells.forEach((c, i) => {
-      const f = boardFlash[c.key] || 0;
-      if (f > 0) {
-        boardFlash[c.key] = f - 1;
-        if ((f >> 2) & 1) {
-          bctx.fillStyle = '#222b52';
-          bctx.fillRect(x, 1, c.w, H - 2);
-        }
-      }
-      pixelText(bctx, c.label, x + Math.floor((c.w - textWidth(c.label)) / 2), 2, '#8f9bcc');
-      pixelText(bctx, c.value, x + Math.floor((c.w - textWidth(c.value)) / 2), 8, f > 0 && ((f >> 2) & 1) ? '#ffffff' : c.color);
-      x += c.w;
-      if (i < cells.length - 1) {
-        bctx.fillStyle = '#2a3150';
-        bctx.fillRect(x, 2, 1, H - 4);
-        x += 1;
-      }
-    });
   }
 
   function resetBall() {
@@ -749,11 +686,11 @@
     if (grade === GRADES.green) {
       greens++;
       greenRun++;
-      burst(ball.x, ball.y, [GREEN, GREEN_LIGHT, '#ffffff'], 22, 1.6);
+      burst(ball.x, ball.y, [GREEN, GREEN_LIGHT, tone(1)], 22, 1.6);
       if (fx()) rings.push({ x: kxNow() + 10, y: koalaTop() + 12, t: 0 });
       if (greenRun >= 3 && !onFire) {
         onFire = true;
-        setTimeout(() => say('ON FIRE', '#ffb347'), 900);
+        setTimeout(() => say('ON FIRE', HOT), 900);
       }
     } else {
       greenRun = 0;
@@ -853,7 +790,6 @@
       if (k.shake > 0) k.shake--;
     } else if (k.state === 'pet') {
       pose = ((k.t >> 3) & 1) ? POSE.waveIn : POSE.waveOut;
-      if (k.t === 6) hearts.push({ x: kxNow() + 7, y: koalaTop() - 4, t: 0 });
       if (k.t > 56) { k.state = 'hold'; k.t = 0; }
     } else if (k.state === 'dunk') {
       stepDunk();
@@ -955,8 +891,8 @@
     ball.noScore = false;
     ball.trail = [];
     attempts++;
-    say('SLAM DUNK', '#f4c542');
-    burst(rimMid(), L.rimY, ['#f4c542', '#ffffff', '#e06a2c'], 26, 1.8);
+    say('SLAM DUNK', HOT);
+    burst(rimMid(), L.rimY, [HOT, tone(1), '#ffb347'], 26, 1.8);
   }
 
   function heldBallPosition() {
@@ -1034,7 +970,7 @@
         particles.push({
           x: ball.x + (Math.random() - 0.5) * 4, y: ball.y + (Math.random() - 0.5) * 4,
           vx: -ball.vx * 0.2, vy: -0.25 - Math.random() * 0.3, g: 0,
-          life: 10 + Math.random() * 10, color: ['#ffd34d', '#ff8a2a', '#ff5a1f'][i + (Math.random() < 0.5 ? 0 : 1)], size: 1,
+          life: 10 + Math.random() * 10, color: ['#ffb347', HOT, HOT][i + (Math.random() < 0.5 ? 0 : 1)], size: 1,
         });
       }
     }
@@ -1061,7 +997,7 @@
       makes++;
       makeRun++;
       net.v += ball.dunk ? 0.6 : ball.green ? 0.45 : 0.32;
-      if (ball.green) burst(rimMid(), L.rimY + 4, [GREEN, GREEN_LIGHT, '#ffffff'], 14, 1.2);
+      if (ball.green) burst(rimMid(), L.rimY + 4, [GREEN, GREEN_LIGHT, tone(1)], 14, 1.2);
       if (!ball.dunk) koala.cheer = 30;
       updateTally();
     }
@@ -1112,8 +1048,6 @@
     particles = particles.filter((p) => p.life > 0);
     for (const r of rings) r.t++;
     rings = rings.filter((r) => r.t < 20);
-    for (const h of hearts) h.t++;
-    hearts = hearts.filter((h) => h.t < 60);
     if (label && ++label.t > 75) label = null;
     if (meter.on && meter.grade && ++meter.after > 55) meter.on = false;
 
@@ -1200,16 +1134,16 @@
     const flashOn = flashing && ((meter.after >> 2) & 1) === 0;
 
     // Frame: dark outline, silver bevel, notched green window.
-    ctx.fillStyle = '#141a33';
+    ctx.fillStyle = tone(0.9);
     ctx.fillRect(mx + 1, my, 5, 27);
     ctx.fillRect(mx, my + 1, 7, 25);
-    ctx.fillStyle = flashing ? (flashOn ? GREEN : GREEN_LIGHT) : '#d4d8e6';
+    ctx.fillStyle = flashing ? (flashOn ? GREEN : GREEN_LIGHT) : tone(0.3);
     ctx.fillRect(mx + 1, my + 1, 5, 25);
     if (!flashing) {
-      ctx.fillStyle = '#9aa1bb';
+      ctx.fillStyle = tone(0.5);
       ctx.fillRect(mx + 5, my + 2, 1, 23);
     }
-    ctx.fillStyle = '#2a3150';
+    ctx.fillStyle = tone(0);
     ctx.fillRect(mx + 2, my + 2, 3, CH);
     ctx.fillStyle = '#1e5a3a';
     ctx.fillRect(mx + 2, my + 2, 3, 3);
@@ -1218,13 +1152,13 @@
     ctx.fillRect(mx + 7, my + 2, 1, 3);
 
     const filled = Math.round(Math.min(1, meter.f) * CH);
-    let fill = '#f4f5fa';
+    let fill = tone(1);
     if (grade) fill = grade === GRADES.green ? (flashOn ? GREEN_LIGHT : GREEN) : grade.color;
     ctx.fillStyle = fill;
     ctx.fillRect(mx + 2, my + 2 + CH - filled, 3, filled);
     // A brighter cap on the fill, like the leading edge of the bar.
     if (filled > 0 && !grade) {
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = tone(1);
       ctx.fillRect(mx + 2, my + 2 + CH - filled, 3, 1);
     }
   }
@@ -1245,10 +1179,6 @@
       ctx.fillStyle = p.color;
       ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
     }
-    for (const h of hearts) {
-      if (h.t > 45 && (h.t & 1)) continue;
-      ctx.drawImage(HEART, h.x, Math.round(h.y - h.t * 0.25));
-    }
   }
 
   function drawLabel() {
@@ -1258,7 +1188,7 @@
     const tw = textWidth(label.text);
     const x = Math.max(1, Math.min(L.w - tw - 1, Math.round(kxNow() + 10 - tw / 2)));
     const y = Math.max(2, koalaTop() - 10 - Math.min(4, Math.floor(t / 3)));
-    pixelText(ctx, label.text, x, y, label.color, '#141a33');
+    pixelText(ctx, label.text, x, y, label.color, tone(0));
   }
 
   function drawTwinkles() {
@@ -1266,10 +1196,10 @@
     for (const s of twinkles) {
       const b = Math.sin(now * 1.7 + s.phase);
       if (b < -0.3) continue;
-      ctx.fillStyle = b > 0.5 ? '#ffffff' : '#9fa9d8';
+      ctx.fillStyle = b > 0.5 ? tone(1) : tone(0.5);
       ctx.fillRect(s.x, s.y, 1, 1);
       if (b > 0.85) {
-        ctx.fillStyle = '#9fa9d8';
+        ctx.fillStyle = tone(0.5);
         ctx.fillRect(s.x - 1, s.y, 1, 1);
         ctx.fillRect(s.x + 1, s.y, 1, 1);
         ctx.fillRect(s.x, s.y - 1, 1, 1);
@@ -1289,105 +1219,103 @@
     drawEffects();
     drawMeter();
     drawLabel();
-    drawBoard();
+    present();
   }
 
-  // Night scene: a koala asleep on its ball under a streetlight ---------------
+  // Dots -------------------------------------------------------------------
 
-  const N = nightCanvas ? { c: nightCanvas.getContext('2d', { alpha: false }), w: 0, h: 44, scale: 4, t: 0, wake: 0, kx: 0, visible: false, bg: null } : null;
-  const NIGHT_SKY = '#141a36';
-  const NIGHT_GROUND = '#1c2347';
+  const DOT_MAX = 0.92;   // biggest dot, as a share of the pitch
+  const INK = 0, ACCENT = 1, GOOD = 2;
+  const special = new Map(); // exact buffer colors that keep a color
+  const tag = (hex, kind, tone) => {
+    const [r, g, b] = rgb(hex);
+    special.set((r << 16) | (g << 8) | b, kind * 16 + Math.round(tone * LEVELS));
+  };
+  special.set(0xff00ff, 0); // the orb's hole
+  for (const k of ['o', 'O']) tag(BALL[k], ACCENT, 1);
+  for (const k of ['r', 's']) tag(BALL[k], ACCENT, 0.8);
+  tag(BALL.q, ACCENT, 1);
+  tag(C.rim, ACCENT, 1);
+  tag(C.rimDark, ACCENT, 0.8);
+  tag('#ffb347', ACCENT, 0.5);
+  tag(GREEN, GOOD, 1);
+  tag(GREEN_LIGHT, GOOD, 0.6);
+  tag('#1e5a3a', GOOD, 0.45);
 
-  function layoutNight() {
-    if (!N) return;
-    const W = nightCanvas.parentElement.clientWidth;
-    N.scale = L ? L.scale : 4;
-    N.w = Math.ceil(W / N.scale);
-    nightCanvas.width = N.w;
-    nightCanvas.height = N.h;
-    nightCanvas.style.width = `${N.w * N.scale}px`;
-    nightCanvas.style.height = `${N.h * N.scale}px`;
-    N.c.imageSmoothingEnabled = false;
+  const codes = new Map(); // buffer color -> kind * 16 + level
+  let inks = ['#000', '#d60', '#090'];
+  let shown = null;        // what each cell currently shows
+  let grain = null;        // a ragged edge for the printing line
+  // On load the picture prints from the top, in a little over a second.
+  let printStart = reducedMotion.matches ? -Infinity : 0;
+  let warming = !reducedMotion.matches; // the sun and glow fade in alongside
+  if (warming) hero.style.setProperty('--warm', '0');
 
-    const groundTop = N.h - 8;
-    let lampX = Math.round(N.w * 0.66);
-    if (lampX + 28 > N.w) lampX = N.w - 28;
-    N.kx = lampX + 9 - 10;
-    N.groundTop = groundTop;
+  // The --c-* properties are the theme's own values. The plain ones ease
+  // from theme to theme, so they'd be mid-change right after T is pressed.
+  function readTheme() {
+    const css = getComputedStyle(document.documentElement);
+    const get = (name, fallback) => css.getPropertyValue(name).trim() || fallback;
+    inks = [get('--c-ink', '#33243a'), get('--c-accent', '#dd6a2e'), get('--c-good', '#2f8f4e')];
+    if (themeMeta) themeMeta.content = get('--c-paper', '#f3e4cf');
+    codes.clear();
+    if (shown) shown.fill(-1);
+  }
 
-    const c = document.createElement('canvas');
-    c.width = N.w;
-    c.height = N.h;
-    const x = c.getContext('2d');
-    x.fillStyle = NIGHT_SKY;
-    x.fillRect(0, 0, N.w, N.h);
-    // Light cone and the pool it leaves on the ground.
-    const cx = lampX + 9;
-    for (let y = 9; y < groundTop; y++) {
-      const hw = (y - 9) * 0.55 + 1;
-      for (let px = Math.floor(cx - hw); px <= cx + hw; px++) {
-        const fall = 1 - Math.abs(px - cx) / (hw + 1);
-        if (BAYER[y & 3][px & 3] / 16 < fall * 0.3) {
-          x.fillStyle = '#20284f';
-          x.fillRect(px, y, 1, 1);
-        }
+  function layoutDots() {
+    const { w, h, scale } = L;
+    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    view.width = Math.round(w * scale * dpr);
+    view.height = Math.round(h * scale * dpr);
+    view.style.width = `${w * scale}px`;
+    view.style.height = `${h * scale}px`;
+    vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    shown = new Int16Array(w * h).fill(-1);
+    grain = new Uint8Array(w * h);
+    const rand = seeded(41);
+    for (let i = 0; i < grain.length; i++) grain[i] = Math.floor(rand() * 7);
+    readTheme();
+  }
+
+  // The koala and anything else in real colors print by how dark they are.
+  // At night the paper is dark and the ink is light, so it flips, and the
+  // picture stays a positive.
+  function inkLevel(r, g, b) {
+    const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return Math.round((timeKey === 'night' ? lum : 1 - lum) * LEVELS);
+  }
+
+  function present() {
+    const { w, h, scale } = L;
+    const d = ctx.getImageData(0, 0, w, h).data;
+    const half = scale / 2;
+    if (!printStart) printStart = performance.now();
+    const printed = (performance.now() - printStart) * 0.085; // rows so far
+    const printing = printed < h + 8;
+    if (warming) {
+      hero.style.setProperty('--warm', Math.min(1, printed / h).toFixed(3));
+      warming = printing;
+    }
+    for (let i = 0, o = 0, n = w * h; i < n; i++, o += 4) {
+      const key = (d[o] << 16) | (d[o + 1] << 8) | d[o + 2];
+      let code = codes.get(key);
+      if (code === undefined) {
+        if (d[o] === 2 && d[o + 2] === 1) code = d[o + 1] / 20;
+        else code = special.has(key) ? special.get(key) : inkLevel(d[o], d[o + 1], d[o + 2]);
+        codes.set(key, code);
       }
-    }
-    x.fillStyle = NIGHT_GROUND;
-    x.fillRect(0, groundTop, N.w, N.h - groundTop);
-    x.fillStyle = '#262e58';
-    x.fillRect(0, groundTop, N.w, 1);
-    for (let y = groundTop; y < groundTop + 4; y++) {
-      const rx = 16 - (y - groundTop) * 2;
-      for (let px = Math.round(cx - rx); px <= cx + rx; px++) {
-        if (BAYER[y & 3][px & 3] / 16 < 0.75 - (Math.abs(px - cx) / (rx + 1)) * 0.7) {
-          x.fillStyle = '#39416f';
-          x.fillRect(px, y, 1, 1);
-        }
-      }
-    }
-    // Lamp post.
-    x.fillStyle = '#0d1129';
-    x.fillRect(lampX, 6, 2, groundTop - 6);
-    x.fillRect(lampX - 1, groundTop - 1, 4, 2);
-    x.fillRect(lampX, 5, 10, 1);
-    x.fillRect(lampX + 6, 6, 6, 1);
-    x.fillStyle = C.lamp;
-    x.fillRect(lampX + 6, 7, 6, 1);
-    N.bg = c;
-  }
-
-  function stepNight() {
-    if (!N) return;
-    N.t++;
-    if (N.wake > 0) N.wake--;
-  }
-
-  function drawNight() {
-    if (!N || !N.bg) return;
-    const c = N.c;
-    const gt = N.groundTop;
-    c.drawImage(N.bg, 0, 0);
-    const awake = N.wake > 0;
-    const breathe = !awake && Math.floor(N.t / 50) % 2 ? 1 : 0;
-    const top = gt - 26;
-    c.drawImage(BALL_FRAMES[0], N.kx + 7, gt - 6);
-    const armPose = awake ? (((N.t >> 3) & 1) ? POSE.waveIn : POSE.waveOut) : POSE.hang;
-    drawArm(c, N.kx, top, armPose);
-    c.drawImage(LEGS.crouch, N.kx, gt - 5);
-    c.drawImage(TORSO, N.kx, top + 13);
-    drawHead(c, N.kx, top + breathe, { dx: 0, dy: 0 }, !awake || N.wake < 4);
-
-    if (awake) {
-      pixelText(c, 'HI!', N.kx + 4, Math.max(1, top - 8), '#fff4e8', NIGHT_SKY);
-      return;
-    }
-    // Zs drift up and to the right, then fade.
-    const zs = fx() ? [0, 40, 80] : [30];
-    for (const off of zs) {
-      const p = ((N.t + off) % 120) / 120;
-      if (p > 0.8 && (N.t & 1)) continue;
-      pixelText(c, 'Z', N.kx + 19 + Math.round(p * 6), top + 2 - Math.round(p * 14), '#c9d0f0');
+      if (printing && ((i / w) | 0) + grain[i] > printed) code = 0;
+      if (code === shown[i]) continue;
+      shown[i] = code;
+      const x = (i % w) * scale;
+      const y = ((i / w) | 0) * scale;
+      vctx.clearRect(x, y, scale, scale);
+      const level = code & 15;
+      if (!level) continue;
+      vctx.fillStyle = inks[code >> 4];
+      vctx.beginPath();
+      vctx.arc(x + half, y + half, half * DOT_MAX * Math.sqrt(level / LEVELS), 0, 6.2832);
+      vctx.fill();
     }
   }
 
@@ -1401,10 +1329,9 @@
 
   // With reduced motion the scene only moves while something you started plays out.
   const heroBusy = () => !(koala.state === 'hold' && ball.held) || Math.abs(net.v) > 0.001 ||
-    particles.length || rings.length || hearts.length || label || meter.on;
+    particles.length || rings.length || label || meter.on;
   const heroWants = () => heroVisible && (fx() || heroBusy());
-  const nightWants = () => N && N.visible && (fx() || N.wake > 0);
-  const shouldRun = () => !document.hidden && (heroWants() || nightWants());
+  const shouldRun = () => !document.hidden && heroWants();
 
   function frame(now) {
     if (!last) last = now;
@@ -1414,11 +1341,9 @@
       stepKoala();
       stepBall();
       stepEffects();
-      stepNight();
       acc -= STEP;
     }
     if (heroVisible) draw();
-    if (N && N.visible) drawNight();
     if (shouldRun()) requestAnimationFrame(frame);
     else running = false;
   }
@@ -1433,11 +1358,9 @@
 
   function rebuild() {
     layout();
-    layoutNight();
     resetBall();
     stepBall();
     draw();
-    drawNight();
     start();
   }
 
@@ -1466,9 +1389,9 @@
     releaseShot();
   }
 
-  canvas.addEventListener('pointerdown', (e) => {
+  view.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
-    const [x, y] = toLowRes(e, canvas, L.scale);
+    const [x, y] = toLowRes(e, view, L.scale);
     if (onKoala(x, y)) { pet(); return; }
     beginHold();
   });
@@ -1497,20 +1420,10 @@
 
   hero.addEventListener('pointermove', (e) => {
     if (!L) return;
-    [pointer.x, pointer.y] = toLowRes(e, canvas, L.scale);
+    [pointer.x, pointer.y] = toLowRes(e, view, L.scale);
     pointer.idle = 240;
     start();
   });
-
-  if (nightCanvas) {
-    nightCanvas.addEventListener('pointerdown', (e) => {
-      const [x, y] = toLowRes(e, nightCanvas, N.scale);
-      if (x >= N.kx - 2 && x <= N.kx + 24 && y >= N.groundTop - 30) {
-        N.wake = 110;
-        start();
-      }
-    });
-  }
 
   const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
   let konamiAt = 0;
@@ -1529,22 +1442,20 @@
   });
 
   let resizeTimer = 0;
+  let builtWidth = -1;
   new ResizeObserver(() => {
+    if (hero.clientWidth === builtWidth) return;
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(rebuild, L ? 120 : 0);
-  }).observe(document.body);
+    resizeTimer = setTimeout(() => {
+      builtWidth = hero.clientWidth;
+      rebuild();
+    }, L ? 120 : 0);
+  }).observe(hero);
 
   new IntersectionObserver(([entry]) => {
     heroVisible = entry.isIntersecting;
     start();
   }).observe(hero);
-
-  if (nightCanvas) {
-    new IntersectionObserver(([entry]) => {
-      N.visible = entry.isIntersecting;
-      start();
-    }).observe(nightCanvas);
-  }
 
   document.addEventListener('visibilitychange', start);
   reducedMotion.addEventListener('change', start);

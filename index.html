@@ -4,28 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anish Nambirajan</title>
-  <meta name="description" content="Anish Nambirajan studies computer science at UC Irvine and builds software across the stack. Most recently a software engineering intern at Roblox.">
+  <meta name="description" content="Anish Nambirajan studies computer science at UC Irvine. Most recently a software engineer intern at Roblox.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://anishnambirajan.com/">
   <meta property="og:title" content="Anish Nambirajan">
-  <meta property="og:description" content="Computer science at UC Irvine. Software engineering intern at Roblox, summer 2026.">
+  <meta property="og:description" content="CS at UC Irvine, class of 2028. Software engineer intern at Roblox, summer 2026.">
   <meta property="og:image" content="https://anishnambirajan.com/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="hi, i'm anish. A pixel koala in a blue and gold jersey dribbling on an outdoor court at dusk.">
+  <meta property="og:image:alt" content="hi, i'm anish. A koala shooting hoops on an outdoor court at dusk, drawn in dots.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://anishnambirajan.com/og.png">
-  <meta name="theme-color" content="#2b3a6b">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Corinthia&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#f3e4cf">
+  <link rel="icon" href="icon.svg?v=4" type="image/svg+xml">
+  <link rel="preload" href="fonts/fragment-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/corinthia-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <script>
+    // The page wears the time of day where you are. Set before first paint.
+    (function () {
+      var asked = new URLSearchParams(location.search).get('time');
+      var h = new Date().getHours();
+      document.documentElement.dataset.time = /^(dawn|day|dusk|night)$/.test(asked) ? asked
+        : h >= 5 && h < 8 ? 'dawn' : h >= 8 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night';
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
-  <header class="hero" id="top" data-time="dusk">
-    <canvas id="court" role="img" aria-label="Pixel art of a koala in a blue and gold jersey and black Nike GT Cuts, shooting hoops on an outdoor court. The sky matches the time of day where you are."></canvas>
-
+  <div class="page">
     <nav class="nav" aria-label="Sections">
       <a class="nav-name" href="#top">anish nambirajan</a>
       <ul>
@@ -36,201 +42,146 @@
       </ul>
     </nav>
 
-    <div class="hero-copy">
+    <header class="intro" id="top">
       <h1>hi, i&rsquo;m anish.</h1>
-      <p>I study computer science at UC Irvine. I spent this summer as a software engineering intern at Roblox, and on the side I build LLM agents.</p>
-    </div>
+      <p>I study computer science at UC Irvine. Last summer I was a software engineer intern at <a class="co" href="#experience"><img src="logos/roblox_logo.jpg" alt="" width="20" height="20">Roblox</a>.</p>
+    </header>
 
-    <div class="hero-play">
+    <div class="hero" data-time="dusk">
+      <span class="orb" aria-hidden="true"></span>
+      <canvas id="court" role="img" aria-label="A koala in a jersey shooting hoops on an outdoor court, drawn in dots. The sky matches the time of day where you are."></canvas>
+    </div>
+    <div class="play">
       <button id="shoot" type="button">Hold to shoot</button>
-      <canvas id="scoreboard" aria-hidden="true"></canvas>
-      <p class="hero-hint">Hold, then let go at the top of the meter.</p>
+      <p id="score" aria-hidden="true">fg 0-0  streak 0  best 0</p>
+      <p class="hero-hint muted">Let go at the top.</p>
       <p id="tally" class="visually-hidden" aria-live="polite"></p>
+      <p class="sky-note muted"><span id="sky">Dusk where you are.</span> <span class="keys"><kbd>T</kbd> changes it.</span></p>
     </div>
-  </header>
 
-  <main>
-    <section class="band band-court" id="about" aria-labelledby="about-title">
-      <div class="wrap">
-        <div class="about-grid">
-          <div class="prose">
-            <h2 id="about-title">about</h2>
-            <p>I&rsquo;m a CS student at UC Irvine, graduating in 2028. I spent this past summer at Roblox, building the system that publishes a creator&rsquo;s item to the catalog as soon as moderation approves it.</p>
-            <p>Most of my free time goes into LLM side projects. Right now that&rsquo;s PaperMind, an agent that explains ML papers at whatever level you&rsquo;re reading at.</p>
-            <p>When I&rsquo;m not coding, I&rsquo;m probably playing or watching basketball or tennis, or eating something with Nutella on it.</p>
-          </div>
-          <div class="interests">
-            <h3 class="display-heading">lately i&rsquo;m into</h3>
-            <ul class="badges">
-              <li class="badge" data-badge="bolt">
-                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
-                <div>
-                  <p class="badge-name">Inference</p>
-                  <p class="badge-desc">Serving models faster and cheaper, with KV-cache reuse and vLLM.</p>
-                </div>
-              </li>
-              <li class="badge" data-badge="dumbbell">
-                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
-                <div>
-                  <p class="badge-name">Post-training</p>
-                  <p class="badge-desc">Fine-tuning open models with SFT and DPO.</p>
-                </div>
-              </li>
-              <li class="badge" data-badge="lens">
-                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
-                <div>
-                  <p class="badge-name">Retrieval</p>
-                  <p class="badge-desc">Hybrid search, and measuring where each method fails.</p>
-                </div>
-              </li>
-              <li class="badge" data-badge="check">
-                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
-                <div>
-                  <p class="badge-name">Evals</p>
-                  <p class="badge-desc">Faithfulness, calibration, and LLM judges worth trusting.</p>
-                </div>
-              </li>
-              <li class="badge" data-badge="robot">
-                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
-                <div>
-                  <p class="badge-name">Agents</p>
-                  <p class="badge-desc">Tool use, MCP servers, and many agents arguing it out.</p>
-                </div>
-              </li>
-              <li class="badge" data-badge="nodes">
-                <canvas class="badge-art" width="26" height="28" aria-hidden="true"></canvas>
-                <div>
-                  <p class="badge-name">Distributed systems</p>
-                  <p class="badge-desc">Workflows, retries, and idempotency.</p>
-                </div>
-              </li>
-            </ul>
-          </div>
+    <main>
+      <section class="section" id="about" aria-labelledby="about-title">
+        <h2 id="about-title">about</h2>
+        <div class="prose">
+          <p>I&rsquo;m graduating in 2028. At Roblox I built the system that publishes a creator&rsquo;s item to the catalog as soon as moderation approves it.</p>
+          <p>When I&rsquo;m not coding, I&rsquo;m probably playing or watching basketball, or eating something with Nutella on it.</p>
         </div>
-      </div>
-    </section>
 
-    <section class="band band-dusk" id="experience" aria-labelledby="experience-title">
-      <div class="wrap">
+        <h3 class="script">lately i&rsquo;m into</h3>
+        <ul class="badges">
+          <li><span class="dots" data-icon="bolt" aria-hidden="true"></span><div><p class="badge-name">Inference</p><p class="muted">Serving models faster and cheaper, with KV-cache reuse and vLLM.</p></div></li>
+          <li><span class="dots" data-icon="dumbbell" aria-hidden="true"></span><div><p class="badge-name">Post-training</p><p class="muted">Fine-tuning open models with SFT and DPO.</p></div></li>
+          <li><span class="dots" data-icon="lens" aria-hidden="true"></span><div><p class="badge-name">Retrieval</p><p class="muted">Hybrid search, and measuring where each method fails.</p></div></li>
+          <li><span class="dots" data-icon="check" aria-hidden="true"></span><div><p class="badge-name">Evals</p><p class="muted">Faithfulness, calibration, and LLM judges worth trusting.</p></div></li>
+          <li><span class="dots" data-icon="robot" aria-hidden="true"></span><div><p class="badge-name">Agents</p><p class="muted">Tool use, MCP servers, and many agents arguing it out.</p></div></li>
+          <li><span class="dots" data-icon="nodes" aria-hidden="true"></span><div><p class="badge-name">Distributed systems</p><p class="muted">Workflows, retries, and idempotency.</p></div></li>
+        </ul>
+      </section>
+
+      <section class="section" id="experience" aria-labelledby="experience-title">
         <h2 id="experience-title">experience</h2>
         <ol class="timeline">
           <li class="stop">
-            <p class="stop-when"><span class="stop-year">2026</span> <span class="stop-months">Jun&ndash;Sep</span></p>
-            <div class="stop-node"><img class="job-logo" src="logos/roblox_logo.jpg" alt="" width="48" height="48"></div>
+            <img class="logo" src="logos/roblox_logo.jpg" alt="" width="44" height="44">
             <div class="stop-body">
-              <h3>Roblox</h3>
-              <p class="job-role">Software engineering intern, San Mateo</p>
-              <p class="job-summary">Built auto-publish for UGC creators end to end: once moderation approves an item, it lands in the catalog on its own.</p>
-              <div class="flow" aria-label="How auto-publish works">
-                <ol class="flow-steps">
-                  <li><button type="button" class="flow-step" data-step="studio" data-detail="The creator opts in and agrees to the fee at upload."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Studio</span></button></li>
-                  <li><button type="button" class="flow-step" data-step="review" data-detail="The item gets reviewed and approved."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Moderation</span></button></li>
-                  <li><button type="button" class="flow-step" data-step="event" data-detail="The approval event starts the post-moderation workflow."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Event</span></button></li>
-                  <li><button type="button" class="flow-step" data-step="workflow" data-detail="Temporal runs the publish activity and retries it on transient failures."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Workflow</span></button></li>
-                  <li><button type="button" class="flow-step" data-step="publish" data-detail="Checks opt-in, saved defaults, and the agreed fee, then publishes over gRPC with a UUIDv5 idempotency key, so a redelivered event can never publish twice."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Publish</span></button></li>
-                  <li><button type="button" class="flow-step" data-step="catalog" data-detail="The item goes on sale and the creator gets a message."><canvas width="12" height="12" aria-hidden="true"></canvas><span>Catalog</span></button></li>
-                </ol>
-                <p class="flow-detail" aria-live="polite">Hover a step to see what it does.</p>
+              <div class="stop-head">
+                <h3>Roblox</h3>
+                <p class="when">Jun&ndash;Sep 2026</p>
               </div>
+              <p class="muted">Software engineer intern, San Mateo</p>
+              <p class="summary">Built auto-publish for UGC creators end to end: once moderation approves an item, it lands in the catalog on its own.</p>
+              <div class="pipe">
+                <ol class="pipe-steps" aria-label="How auto-publish works">
+                  <li><button type="button" data-detail="The creator opts in and agrees to the fee at upload."><span class="dots" data-icon="studio" aria-hidden="true"></span><span>Studio</span></button></li>
+                  <li><button type="button" data-detail="The item gets reviewed and approved."><span class="dots" data-icon="review" aria-hidden="true"></span><span>Moderation</span></button></li>
+                  <li><button type="button" data-detail="The approval event starts the post-moderation workflow."><span class="dots" data-icon="bolt" aria-hidden="true"></span><span>Event</span></button></li>
+                  <li><button type="button" data-detail="Temporal runs the publish activity and retries it on transient failures."><span class="dots" data-icon="workflow" aria-hidden="true"></span><span>Workflow</span></button></li>
+                  <li><button type="button" data-detail="Checks opt-in, saved defaults, and the agreed fee, then publishes over gRPC with a UUIDv5 idempotency key, so a redelivered event can never publish twice."><span class="dots" data-icon="publish" aria-hidden="true"></span><span>Publish</span></button></li>
+                  <li><button type="button" data-detail="The item goes on sale and the creator gets a message."><span class="dots" data-icon="catalog" aria-hidden="true"></span><span>Catalog</span></button></li>
+                </ol>
+                <p class="pipe-detail muted" aria-live="polite">Hover or tap a step to see what it does.</p>
+              </div>
+              <ul class="chips" aria-label="Tech used"><li>C#/.NET</li><li>gRPC</li><li>Temporal</li><li>Kafka</li><li>Docker</li><li>React</li><li>TypeScript</li></ul>
             </div>
-            <ul class="chips stop-stack" aria-label="Tech used"><li>C#/.NET</li><li>gRPC</li><li>Temporal</li><li>Kafka</li><li>Docker</li><li>React</li><li>TypeScript</li></ul>
           </li>
           <li class="stop">
-            <p class="stop-when"><span class="stop-year">2025&ndash;26</span> <span class="stop-months">Jun&ndash;Jun</span></p>
-            <div class="stop-node"><img class="job-logo job-logo-dark" src="logos/aiatuci_logo_cropped.png" alt="" width="48" height="48"></div>
+            <img class="logo" src="logos/aiatuci_logo_cropped.png" alt="" width="44" height="44">
             <div class="stop-body">
-              <h3>AI @ UCI</h3>
-              <p class="job-role">Projects team</p>
-              <p class="job-summary">Designed starter projects for club members to build.</p>
+              <div class="stop-head">
+                <h3>AI @ UCI</h3>
+                <p class="when">Jun 2025&ndash;Jun 2026</p>
+              </div>
+              <p class="muted">Projects team, Irvine</p>
+              <p class="summary">Designed starter projects for club members to build.</p>
             </div>
           </li>
           <li class="stop">
-            <p class="stop-when"><span class="stop-year">2025</span> <span class="stop-months">Jan&ndash;Apr</span></p>
-            <div class="stop-node"><img class="job-logo" src="logos/ready_tutor_logo.jpg" alt="" width="48" height="48"></div>
+            <img class="logo" src="logos/ready_tutor_logo.jpg" alt="" width="44" height="44">
             <div class="stop-body">
-              <h3>ReadyTutor</h3>
-              <p class="job-role">Software engineering intern, Irvine</p>
-              <p class="job-summary">Built CourseEater, a UCI course scheduler.</p>
+              <div class="stop-head">
+                <h3>ReadyTutor</h3>
+                <p class="when">Jan&ndash;Apr 2025</p>
+              </div>
+              <p class="muted">Software engineer intern, Irvine</p>
+              <p class="summary">Built CourseEater, a UCI course scheduler.</p>
+              <ul class="chips" aria-label="Tech used"><li>MongoDB</li><li>Express</li><li>React</li><li>Redux</li><li>Node.js</li><li>Vite</li></ul>
             </div>
-            <ul class="chips stop-stack" aria-label="Tech used"><li>MongoDB</li><li>Express</li><li>React</li><li>Redux</li><li>Node.js</li><li>Vite</li></ul>
           </li>
         </ol>
+      </section>
 
-      </div>
-    </section>
-
-    <section class="band band-twilight" id="projects" aria-labelledby="projects-title">
-      <div class="wrap">
+      <section class="section" id="projects" aria-labelledby="projects-title">
         <h2 id="projects-title">projects</h2>
         <div class="projects">
           <article class="project">
-            <a class="project-shot" href="https://github.com/an301/papermind">
-              <img src="assets/papermind.jpg" alt="PaperMind reading Attention Is All You Need, with the outline on the left and a question panel on the right" width="1400" height="875" loading="lazy">
-            </a>
+            <a class="shot" href="https://github.com/an301/papermind"><img src="assets/papermind.jpg" alt="PaperMind reading Attention Is All You Need, with the outline on the left and a question panel on the right" width="1400" height="875" loading="lazy"></a>
             <div class="project-text">
               <h3>PaperMind</h3>
-              <p class="project-what">An agent that reads ML papers with you and explains them at your level. Answers cite the exact lines they come from, and it points out the prerequisites you&rsquo;re missing first.</p>
-              <ul class="job-points">
+              <p>An agent that reads ML papers with you and explains them at your level. Answers cite the exact lines they come from, and it points out the prerequisites you&rsquo;re missing first.</p>
+              <ul class="points">
                 <li>Hybrid BM25 + dense retrieval hits 94.8% recall@10 on a 174-question benchmark over 8 papers.</li>
                 <li>Distilled Claude&rsquo;s answers into Mistral 7B with QLoRA SFT, then DPO, served with vLLM. Calibration accuracy went up 18%.</li>
                 <li>A hand-written ReAct loop drives three MCP servers, including a Neo4j graph of 359 ML concepts.</li>
               </ul>
-              <ul class="chips" aria-label="Tech used">
-                <li>Claude</li><li>FastAPI</li><li>FAISS</li><li>Neo4j</li><li>Redis</li><li>vLLM</li><li>React</li>
-              </ul>
-              <p class="project-links"><a href="https://github.com/an301/papermind">Code on GitHub</a></p>
+              <ul class="chips" aria-label="Tech used"><li>Claude</li><li>FastAPI</li><li>FAISS</li><li>Neo4j</li><li>Redis</li><li>vLLM</li><li>React</li></ul>
+              <p><a href="https://github.com/an301/papermind">Code on GitHub</a></p>
             </div>
           </article>
           <article class="project project-flip">
-            <a class="project-shot" href="https://github.com/rob-9/lumi">
-              <img src="assets/lumi.jpg" alt="A figure Lumi generated: the GLP-1R signaling cascade in neurons next to a heatmap of evidence strength for neuroprotection in Parkinson's disease" width="1400" height="784" loading="lazy">
-            </a>
+            <a class="shot" href="https://github.com/rob-9/lumi"><img src="assets/lumi.jpg" alt="A figure Lumi generated: the GLP-1R signaling cascade in neurons next to a heatmap of evidence strength for neuroprotection in Parkinson's disease" width="1400" height="784" loading="lazy"></a>
             <div class="project-text">
               <h3>Lumi</h3>
-              <p class="project-what">A multi-agent virtual lab for drug discovery. Specialist agents investigate a research question, and an adversarial review panel scores how confident the findings are before they reach the report. The figure is one Lumi made on its own.</p>
-              <ul class="job-points">
+              <p>A multi-agent virtual lab for drug discovery. Specialist agents investigate a research question, and an adversarial review panel scores how confident the findings are before they reach the report. The figure is one Lumi made on its own.</p>
+              <ul class="points">
                 <li>Built 4 MCP servers (BioRender, AntV, MockFlow, PyMOL) and 175+ tools across genomics, literature, and chemistry APIs.</li>
                 <li>Low-confidence findings go to human experts over Slack, backed by a SQLite world model that persists across sessions.</li>
               </ul>
-              <ul class="chips" aria-label="Tech used">
-                <li>Claude</li><li>FastMCP</li><li>Pydantic</li><li>asyncio</li><li>SQLite</li><li>Next.js</li>
-              </ul>
-              <p class="project-links"><a href="https://github.com/rob-9/lumi">Code on GitHub</a></p>
+              <ul class="chips" aria-label="Tech used"><li>Claude</li><li>FastMCP</li><li>Pydantic</li><li>asyncio</li><li>SQLite</li><li>Next.js</li></ul>
+              <p><a href="https://github.com/rob-9/lumi">Code on GitHub</a></p>
             </div>
           </article>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="band band-night" id="contact" aria-labelledby="contact-title">
-      <div class="wrap">
+      <section class="section" id="contact" aria-labelledby="contact-title">
         <h2 id="contact-title">say hi</h2>
-        <div class="contact">
-          <p class="contact-lead">Email is the fastest way to reach me.</p>
-          <p class="contact-email"><a href="mailto:anambira@uci.edu">anambira@uci.edu</a></p>
-          <ul class="contact-links">
-            <li><a href="https://www.linkedin.com/in/anish-nambirajan">LinkedIn</a></li>
-            <li><a href="https://github.com/an301">GitHub</a></li>
-          </ul>
-        </div>
-      </div>
-      <canvas id="night" role="img" aria-label="A koala asleep on a basketball under a streetlight."></canvas>
-    </section>
-  </main>
+        <p class="muted">Email is the fastest way to reach me.</p>
+        <p class="email"><a href="mailto:anambira@uci.edu">anambira@uci.edu</a></p>
+        <ul class="links">
+          <li><a href="https://www.linkedin.com/in/anish-nambirajan">LinkedIn</a></li>
+          <li><a href="https://github.com/an301">GitHub</a></li>
+        </ul>
+      </section>
+    </main>
 
-  <footer class="footer">
-    <div class="wrap footer-row">
-      <p>Anish Nambirajan, 2026</p>
-      <ul class="footer-eggs">
-        <li><span class="keys" aria-label="The Konami code"><kbd>&uarr;</kbd><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd><kbd>B</kbd><kbd>A</kbd></span><span>on the court</span></li>
-        <li><span class="keys"><kbd>T</kbd></span><span>changes the time of day</span></li>
-      </ul>
-    </div>
-  </footer>
+    <footer class="foot">
+      <p>Anish Nambirajan, 2026. <a href="#top">Back to the court</a></p>
+      <p class="keys"><kbd>&uarr;&uarr;&darr;&darr;&larr;&rarr;&larr;&rarr;BA</kbd></p>
+    </footer>
+  </div>
 
-  <script src="koala.js"></script>
-  <script src="badges.js"></script>
-  <script src="flow.js"></script>
+  <script src="koala.js?v=9"></script>
+  <script src="site.js?v=9"></script>
   <script src="track.js"></script>
 </body>
 </html>

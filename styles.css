@@ -1,41 +1,188 @@
-/* Colors are sampled from the pixel court in koala.js. Scrolling down the
-   page runs from the court, through dusk, into night. */
+/* Warm paper, plum ink, and the orange of a basketball, in four lights.
+   Three print
+   textures share the page: a script for the headings, a typewriter face for
+   everything else, and halftone dots for the pictures. */
+
+/* Both faces are SIL OFL 1.1 and self-hosted. Fragment Mono's latin file
+   drops the arrows, so a second tiny file supplies U+2190-21FF. */
+@font-face {
+  font-family: "Fragment Mono";
+  src: url("fonts/fragment-mono-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Fragment Mono";
+  src: url("fonts/fragment-mono-arrows.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+2190-21FF;
+}
+
+@font-face {
+  font-family: "Corinthia";
+  src: url("fonts/corinthia-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* The page wears the time of day where the visitor is: dawn, day, dusk, or
+   night. koala.js (and a line in the <head>, before first paint) sets
+   data-time on <html>; T cycles it.
+
+   Each theme sets the --c-* values. The names everything else uses (--paper,
+   --ink, ...) are registered as colors, so they ease from one theme to the
+   next instead of snapping. */
+@property --paper {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f3e4cf;
+}
+
+@property --paper-deep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e9d5ba;
+}
+
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #33243a;
+}
+
+@property --muted {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #7b6459;
+}
+
+@property --rule {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d9c3a4;
+}
+
+@property --accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #dd6a2e;
+}
+
+@property --accent-deep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #b94c17;
+}
+
+@property --good {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2f8f4e;
+}
+
+@property --glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f3a871;
+}
+
+@property --orb {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e9763a;
+}
+
 :root {
-  --dusk: #2b3a6b;
-  --dusk-raised: #34467a;
-  --night: #141a36;
-  --glow: #fff4e8;
-  --haze: #d9ddef;
-  --ink: #1d2645;
-  --muted: #4f5873;
-  --court: #e7e9ee;
-  --rule: #cdd2dc;
-  --ball: #dd6a2e;
-  --gold: #f4c542;
-  --peach: #f7cda6;
+  /* Dusk, and the fallback without JavaScript. */
+  --c-paper: #f3e4cf;
+  --c-paper-deep: #e9d5ba;
+  --c-ink: #33243a;
+  --c-muted: #7b6459;
+  --c-rule: #d9c3a4;
+  --c-accent: #dd6a2e;
+  --c-accent-deep: #b94c17;
+  --c-good: #2f8f4e;
+  --c-glow: #f3a871;
+  --c-orb: #e9763a;
 
-  --display: "Corinthia", "Snell Roundhand", cursive;
-  --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --paper: var(--c-paper);
+  --paper-deep: var(--c-paper-deep);
+  --ink: var(--c-ink);
+  --muted: var(--c-muted);
+  --rule: var(--c-rule);
+  --accent: var(--c-accent);
+  --accent-deep: var(--c-accent-deep);
+  --good: var(--c-good);
+  --glow: var(--c-glow);
+  --orb: var(--c-orb);
 
-  --gutter: clamp(1rem, 5vw, 4.5rem);
-  --measure: 38rem;
+  --script: "Corinthia", "Snell Roundhand", cursive;
+  --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Stepped corners, so boxes sit in the same pixel world as the court. */
-  --px4: polygon(
-    0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0,
-    calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px,
-    100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%,
-    4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px)
-  );
-  --px2: polygon(
-    0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px,
-    100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%,
-    2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px)
-  );
+  --edge: clamp(20px, 9vw, 150px);
+  color-scheme: light;
+}
 
-  --edge-dusk: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 10V8H4V7H8V6H12V6H16V5H20V4H24V4H28V5H32V6H36V6H40V7H44V7H48V6H52V5H56V5H60V7H64V10Z' fill='%232b3a6b'/%3E%3C/svg%3E");
-  --edge-night: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 10V7H4V5H8V4H12V4H16V5H20V7H24V8H28V6H32V4H36V3H40V3H44V4H48V6H52V7H56V8H60V8H64V10Z' fill='%23141a36'/%3E%3C/svg%3E");
-  --stars: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' shape-rendering='crispEdges'%3E%3Crect x='15' y='46' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='54' y='45' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='31' y='14' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='55' y='4' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='31' y='41' width='1' height='1' fill='%23dfe4f7'/%3E%3Crect x='54' y='30' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='56' y='5' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='22' y='48' width='1' height='1' fill='%235d6aa3'/%3E%3Crect x='38' y='30' width='1' height='1' fill='%235d6aa3'/%3E%3C/svg%3E");
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    transition:
+    --paper 0.7s ease,
+    --paper-deep 0.7s ease,
+    --ink 0.7s ease,
+    --muted 0.7s ease,
+    --rule 0.7s ease,
+    --accent 0.7s ease,
+    --accent-deep 0.7s ease,
+    --good 0.7s ease,
+    --glow 0.7s ease,
+    --orb 0.7s ease;
+  }
+}
+
+:root[data-time="dawn"] {
+  --c-paper: #f7e7e0;
+  --c-paper-deep: #eed7cd;
+  --c-ink: #3a2a40;
+  --c-muted: #856a6e;
+  --c-rule: #e2c8c0;
+  --c-accent: #e2703f;
+  --c-accent-deep: #b84d2a;
+  --c-good: #2f8f4e;
+  --c-glow: #f5bda8;
+  --c-orb: #f19a74;
+}
+
+:root[data-time="day"] {
+  --c-paper: #faf3e3;
+  --c-paper-deep: #f0e5cc;
+  --c-ink: #2f2636;
+  --c-muted: #766558;
+  --c-rule: #dfd0b2;
+  --c-accent: #dd6a2e;
+  --c-accent-deep: #b54a15;
+  --c-good: #2f8f4e;
+  --c-glow: #f8dfb8;
+  --c-orb: #f2b04f;
+}
+
+:root[data-time="night"] {
+  --c-paper: #231a2b;
+  --c-paper-deep: #33273c;
+  --c-ink: #f4e9d8;
+  --c-muted: #b9a6ae;
+  --c-rule: #4f3d55;
+  --c-accent: #f08744;
+  --c-accent-deep: #f39a5c;
+  --c-good: #3ddc6a;
+  --c-glow: #4b3558;
+  --c-orb: #fff6e3;
+  color-scheme: dark;
 }
 
 *,
@@ -45,6 +192,7 @@
 }
 
 html {
+  overflow-x: clip;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
@@ -57,35 +205,13 @@ html {
 
 body {
   margin: 0;
-  background: var(--court);
+  background: var(--paper);
   color: var(--ink);
-  font-family: var(--body);
-  font-size: 1.125rem;
-  line-height: 1.6;
-  font-kerning: normal;
-  text-rendering: optimizeLegibility;
-}
-
-::selection {
-  background: var(--peach);
-  color: var(--ink);
-}
-
-a {
-  color: inherit;
-  text-decoration-line: underline;
-  text-decoration-color: var(--ball);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.22em;
-}
-
-a:hover {
-  text-decoration-thickness: 2px;
-}
-
-:focus-visible {
-  outline: 2px solid var(--ball);
-  outline-offset: 3px;
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.65;
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -94,9 +220,41 @@ h3,
 p,
 ul,
 ol,
-dl,
-dd {
+kbd {
   margin: 0;
+  padding: 0;
+  font: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.muted {
+  color: var(--muted);
 }
 
 .visually-hidden {
@@ -108,66 +266,77 @@ dd {
   white-space: nowrap;
 }
 
-/* Hero ------------------------------------------------------------------ */
+/* Page ------------------------------------------------------------------ */
 
-.hero {
-  --hero-fg: var(--glow);
-  --hero-soft: var(--haze);
+.page {
   position: relative;
-  height: 100vh;
-  height: 100svh;
-  min-height: 34rem;
-  max-height: 68rem;
-  overflow: hidden;
-  background: var(--dusk);
-  color: var(--hero-fg);
+  z-index: 1;
+  width: min(960px, 100% - var(--edge) - 24px);
+  margin-left: var(--edge);
+  padding: 0 0 56px;
 }
 
-/* Daytime sky is light, so the hero text flips to ink. */
-.hero[data-time="day"] {
-  --hero-fg: var(--ink);
-  --hero-soft: #26304f;
+@media (max-width: 40rem) {
+  :root {
+    --edge: 22px;
+  }
+
+  .page {
+    width: calc(100% - 44px);
+  }
+
+  body {
+    font-size: 14px;
+  }
 }
 
-#court {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  display: block;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
+/* The nav stays put, so the next section is always one click away. Its
+   backing runs the full width of the window. */
 .nav {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
-  padding: 1.5rem var(--gutter) 0;
-  font-size: 1rem;
+  padding: 1.1rem 0 0.9rem;
+  color: var(--muted);
+}
+
+.nav::before {
+  content: "";
+  position: absolute;
+  inset: 0 -100vw;
+  z-index: -1;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.nav a[aria-current] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+}
+
+.nav ul {
+  display: flex;
+  gap: clamp(1.5ch, 3vw, 3.5ch);
 }
 
 .nav a {
   text-decoration: none;
-  color: var(--hero-soft);
 }
 
 .nav a:hover {
-  color: var(--hero-fg);
+  color: var(--ink);
   text-decoration: underline;
-  text-decoration-color: var(--peach);
+  text-decoration-color: var(--accent);
 }
 
-.nav-name {
-  font-weight: 500;
-}
-
-/* The hero already says the name; phones need the room for section links. */
+/* The headline already says the name; phones need the room for the links. */
 @media (max-width: 34rem) {
   .nav {
     justify-content: flex-end;
@@ -178,515 +347,397 @@ dd {
   }
 }
 
-.nav ul {
-  display: flex;
-  gap: clamp(1rem, 3vw, 2rem);
-  padding: 0;
-  list-style: none;
+.intro {
+  margin-top: clamp(2.5rem, 9vh, 5rem);
 }
 
-.hero-copy {
+h1,
+h2,
+.script {
+  font-family: var(--script);
+  font-weight: 400;
+}
+
+h1 {
+  margin-left: -0.04em;
+  font-size: clamp(4.75rem, 12vw, 8.5rem);
+  line-height: 0.85;
+}
+
+.intro p {
+  max-width: 66ch;
+  margin-top: 1.25rem;
+  font-size: 1.2rem;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+/* A company name in running text, with its logo. */
+.co {
+  white-space: nowrap;
+  text-decoration-color: var(--rule);
+}
+
+.co:hover {
+  text-decoration-color: var(--accent);
+}
+
+.co img {
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.55ch;
+  border-radius: 0.28em;
+  vertical-align: -0.17em;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--rule);
+}
+
+/* The court ------------------------------------------------------------- */
+
+/* koala.js sizes the canvas to a whole number of dots, places the orb, and
+   sets --horizon and --glow-x. The glow and the orb sit behind the canvas,
+   so the hills print over them. */
+.hero {
   position: relative;
-  padding: clamp(2.5rem, 9vh, 6.5rem) var(--gutter) 0;
+  margin-top: 0.5rem;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--horizon, 0);
+  background: radial-gradient(ellipse 70% 100% at var(--glow-x, 20%) 100%, var(--glow), transparent 72%);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent);
   pointer-events: none;
 }
 
-.hero-copy h1 {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: clamp(4.5rem, 11vw, 10rem);
-  line-height: 0.85;
-  margin-left: -0.04em;
-  color: var(--hero-fg);
+/* Reserve the court's box before koala.js runs, so nothing below jumps.
+   96 rows of dots, at a 3px pitch on narrow screens and 4px otherwise. */
+.hero {
+  container-type: inline-size;
 }
 
-.hero-copy p {
-  max-width: 31rem;
-  margin-top: 1.5rem;
-  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
-  line-height: 1.55;
-  color: var(--hero-soft);
-}
-
-.hero-play {
-  position: absolute;
-  left: var(--gutter);
-  right: var(--gutter);
-  bottom: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  color: var(--ink);
-  font-size: 0.9375rem;
-}
-
-.hero-play button {
-  flex: none;
-  padding: 0.5rem 0.9rem 0.55rem;
-  border: 0;
-  background: var(--ink);
-  color: var(--court);
-  font: inherit;
-  font-weight: 500;
+#court {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 288px;
   cursor: pointer;
-  clip-path: var(--px4);
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
 }
 
-.hero-play button:hover {
-  background: var(--dusk);
-}
-
-.hero-play button:active {
-  transform: translateY(1px);
-}
-
-.hero-play button:focus-visible {
-  outline: none;
-  background: var(--ball);
-  color: var(--ink);
-}
-
-#scoreboard {
-  display: block;
-  flex: none;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
-
-.hero-hint {
-  color: var(--muted);
-  line-height: 1.35;
-}
-
-@media (max-width: 34rem) {
-  .hero-hint {
-    display: none;
+@container (min-width: 640px) {
+  #court {
+    height: 384px;
   }
 }
 
-/* Bands ----------------------------------------------------------------- */
-
-.band {
-  position: relative;
-  scroll-margin-top: 0;
-}
-
-.wrap {
-  max-width: 92rem;
-  padding-inline: var(--gutter);
-}
-
-.band h2,
-.display-heading {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: clamp(3.5rem, 6.5vw, 4.75rem);
-  line-height: 0.9;
-  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
-}
-
-/* Pixel hills that the next band rises out of. */
-.band-dusk::before,
-.band-twilight::before,
-.band-night::before {
-  content: "";
+.orb {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 100%;
-  height: 40px;
-  background-repeat: repeat-x;
-  background-position: left bottom;
-  background-size: 256px 40px;
-  image-rendering: pixelated;
+  border-radius: 50%;
+  background: var(--orb);
   pointer-events: none;
 }
 
-.band-dusk::before {
-  background-image: var(--edge-dusk);
+/* The one page-load moment: the sky warms up while koala.js prints the
+   dots, top to bottom. koala.js drives --warm from 0 to 1. */
+.hero::before,
+.orb {
+  opacity: var(--warm, 1);
 }
 
-.band-twilight::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 10V6H4V7H8V7H12V6H16V5H20V5H24V6H28V7H32V8H36V8H40V7H44V6H48V6H52V5H56V4H60V5H64V10Z' fill='%23202b55'/%3E%3C/svg%3E");
+.play {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 3ch;
+  margin-top: 0.9rem;
 }
 
-.band-night::before {
-  background-image: var(--edge-night);
+.play button {
+  padding: 0.3rem 1.4ch 0.35rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-/* About ----------------------------------------------------------------- */
-
-.band-court {
-  padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(4.5rem, 8vw, 6rem);
+.play button:hover {
+  background: var(--accent-deep);
 }
 
-.about-grid {
-  display: grid;
-  gap: 2.5rem;
-  align-items: start;
+.play button:active {
+  transform: translateY(1px);
 }
 
-@media (min-width: 60rem) {
-  .about-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: clamp(3rem, 6vw, 5.5rem);
+#score {
+  white-space: pre;
+}
+
+.sky-note {
+  margin-left: auto;
+}
+
+@media (max-width: 40rem) {
+  .sky-note {
+    margin-left: 0;
   }
 }
 
+/* Sections -------------------------------------------------------------- */
+
+.section {
+  margin-top: clamp(3.5rem, 8vw, 5.5rem);
+  scroll-margin-top: 4.5rem;
+}
+
+h2 {
+  margin-bottom: 1.25rem;
+  color: var(--accent-deep);
+  font-size: clamp(3.5rem, 7vw, 4.75rem);
+  line-height: 0.9;
+}
+
+.script {
+  margin: 2.75rem 0 1.25rem;
+  color: var(--accent-deep);
+  font-size: clamp(2.5rem, 5vw, 3.25rem);
+  line-height: 0.9;
+}
+
 .prose {
-  max-width: var(--measure);
-  font-size: 1.1875rem;
+  max-width: 64ch;
 }
 
 .prose p + p {
   margin-top: 1em;
 }
 
+.prose p,
+.summary,
+.project-text > p,
+.badges .muted {
+  text-wrap: pretty;
+}
+
+/* Dot-matrix icons, drawn by site.js. */
+.dots {
+  display: block;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  color: var(--accent);
+}
+
+.dots svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 
 .badges {
   display: grid;
-  gap: 1.25rem 1.75rem;
-  padding: 0;
-  list-style: none;
+  gap: 1.5rem 2.5rem;
 }
 
 @media (min-width: 36rem) {
   .badges {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.badge {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 0.9rem;
-  align-items: start;
+@media (min-width: 58rem) {
+  .badges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.badge-art {
-  display: block;
-  width: 52px;
-  height: 56px;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+.badges li {
+  display: flex;
+  gap: 1.75ch;
+  align-items: flex-start;
 }
 
-.badge-name {
-  font-weight: 600;
-  line-height: 1.3;
+.badges .muted {
+  font-size: 0.9em;
+  line-height: 1.5;
 }
-
-.badge-desc {
-  font-size: 0.9375rem;
-  line-height: 1.45;
-  color: var(--muted);
-}
-
 
 /* Experience ------------------------------------------------------------ */
 
-.band-dusk {
-  padding: clamp(2.5rem, 5vw, 3.5rem) 0 clamp(4.5rem, 8vw, 6rem);
-  background: var(--dusk);
-  color: var(--glow);
-}
-
-/* Timeline: newest first. Dates on the left, a rail with the logos as
-   stops, then the work, then the stack. Phones fold the date and stack into
-   the content column. */
 .timeline {
-  --rail: #4a5a92;
-  --stop-gap: 3rem;
+  --gap: 2.25rem;
   display: grid;
-  gap: var(--stop-gap);
-  max-width: 68rem;
-  padding: 0;
-  list-style: none;
+  gap: var(--gap);
 }
 
 .stop {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  grid-template-areas:
-    "node when"
-    "node body"
-    "node stack";
-  column-gap: 1.25rem;
-}
-
-.stop-when {
-  grid-area: when;
-  color: var(--haze);
-  font-size: 0.9375rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.stop-year {
-  margin-right: 0.3rem;
-  color: var(--gold);
-  font-weight: 600;
-}
-
-.stop-node {
-  grid-area: node;
   position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 2.25ch;
 }
 
-/* A frame around each logo. */
-.stop-node .job-logo {
-  box-sizing: content-box;
-  padding: 4px;
-  background-color: var(--dusk-raised);
-  background-clip: border-box;
-}
-
-/* Solid rail from this logo down to the next one. Nothing after the last. */
-.stop:not(:last-child) .stop-node::after {
+/* A dotted rail from each logo down to the next. Nothing after the last. */
+.stop:not(:last-child)::before {
   content: "";
   position: absolute;
-  left: 26px;
-  top: calc(56px + 8px);
-  bottom: calc(-1 * var(--stop-gap) + 8px);
-  width: 4px;
-  background: var(--rail);
+  left: 21px;
+  top: 54px;
+  bottom: calc(-1 * var(--gap) + 10px);
+  border-left: 2px dotted var(--rule);
 }
 
-.stop-body {
-  grid-area: body;
-}
-
-.stop-stack {
-  grid-area: stack;
-}
-
-@media (min-width: 64rem) {
-  .stop {
-    grid-template-columns: 7.5rem 56px minmax(0, 1fr) 13rem;
-    grid-template-areas: "when node body stack";
-    column-gap: 1.75rem;
-  }
-
-  .stop-when {
-    padding-top: 0.6rem;
-    text-align: right;
-  }
-
-  .stop-year {
-    display: block;
-    margin: 0 0 0.2rem;
-    font-size: 1.625rem;
-    line-height: 1;
-  }
-
-  .stop-body {
-    padding-top: 0.55rem;
-  }
-
-  .stop-stack {
-    align-content: flex-start;
-    margin-top: 0;
-    padding-top: 0.7rem;
-  }
-}
-
-.job-logo {
+.logo {
   display: block;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   object-fit: cover;
   background: #fff;
-  clip-path: var(--px4);
+  box-shadow: 0 0 0 1px var(--rule);
 }
 
-.job-logo-dark {
-  background: #0f1040;
-}
-
-.project-head {
+.stop-head {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
-  gap: 0.25rem 1rem;
+  gap: 0 2ch;
 }
 
 .stop h3,
 .project h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  font-size: 1.2rem;
+  line-height: 1.4;
 }
 
-.job-when {
-  font-size: 0.9375rem;
-  color: var(--haze);
-  font-variant-numeric: tabular-nums;
+.when {
+  color: var(--muted);
   white-space: nowrap;
 }
 
-.job-role {
-  color: var(--haze);
+.tag {
+  margin-right: 0.75ch;
+  padding: 0.1rem 0.9ch 0.15rem;
+  border-radius: 999px;
+  background: var(--accent-deep);
+  color: var(--paper);
+  font-size: 0.87em;
 }
 
-.job-summary {
-  margin-top: 0.75rem;
-}
-
-.job-points {
-  margin-top: 0.75rem;
-  padding: 0;
-  list-style: none;
-}
-
-.job-points li {
-  position: relative;
-  padding-left: 1.4rem;
-}
-
-.job-points li + li {
-  margin-top: 0.45rem;
-}
-
-/* Square bullets, one art pixel each. */
-.job-points li::before {
-  content: "";
-  position: absolute;
-  left: 0.15rem;
-  top: 0.62em;
-  width: 6px;
-  height: 6px;
-  background: var(--ball);
+.summary {
+  max-width: 62ch;
+  margin-top: 0.6rem;
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 1.1rem;
-  padding: 0;
-  list-style: none;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
 }
 
 .chips li {
-  padding: 0.2rem 0.6rem 0.25rem;
-  background: var(--dusk-raised);
-  color: var(--haze);
-  font-size: 0.875rem;
-  font-weight: 500;
-  clip-path: var(--px2);
+  padding: 0.05rem 1ch 0.1rem;
+  border-radius: 999px;
+  background: var(--paper-deep);
+  color: var(--muted);
+  font-size: 0.87em;
 }
 
-/* Auto-publish flow, inside the Roblox stop ----------------------------- */
-
-.flow {
-  margin-top: 1rem;
+/* The auto-publish pipeline in the Roblox entry. */
+.pipe {
+  max-width: 62ch;
+  margin-top: 1.1rem;
 }
 
-.flow-steps {
+.pipe-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem 0.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 0.9rem 0;
 }
 
 @media (min-width: 36rem) {
-  .flow-steps {
+  .pipe-steps {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
-.flow-steps li {
+.pipe-steps li {
   position: relative;
 }
 
-/* Thin rail from each step to the next. */
-.flow-steps li:not(:last-child)::after {
+/* Dotted line from each step to the next. */
+.pipe-steps li:not(:last-child)::after {
   content: "";
   position: absolute;
   top: 17px;
-  left: calc(50% + 20px);
-  right: calc(-50% + 20px - 0.5rem);
-  height: 2px;
-  background: #4a5a92;
+  left: calc(50% + 24px);
+  right: calc(-50% + 24px);
+  border-top: 2px dotted var(--rule);
 }
 
 @media (max-width: 35.99rem) {
-  .flow-steps li:nth-child(3)::after {
+  .pipe-steps li:nth-child(3)::after {
     display: none;
   }
 }
 
-.flow-step {
+.pipe-steps button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   width: 100%;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--haze);
+  color: var(--muted);
   font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: 0.87em;
   cursor: default;
 }
 
-.flow-step canvas {
-  display: block;
-  box-sizing: content-box;
-  width: 24px;
-  height: 24px;
-  padding: 6px;
-  background: var(--dusk-raised);
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  clip-path: var(--px2);
-  transition: background-color 150ms ease;
+.pipe-steps .dots {
+  color: var(--ink);
 }
 
-.flow-step:hover,
-.flow-step:focus-visible,
-.flow-step.is-on {
-  color: var(--glow);
-}
-
-.flow-step:hover canvas,
-.flow-step:focus-visible canvas,
-.flow-step.is-on canvas {
-  background: var(--ball);
-}
-
-.flow-step:focus-visible {
+.pipe-steps button:hover,
+.pipe-steps button:focus-visible,
+.pipe-steps button.is-on {
+  color: var(--ink);
   outline: none;
 }
 
-.flow-detail {
-  min-height: 2.9em;
-  margin-top: 0.6rem;
-  font-size: 0.9375rem;
-  line-height: 1.45;
-  color: var(--haze);
+.pipe-steps button:hover .dots,
+.pipe-steps button:focus-visible .dots,
+.pipe-steps button.is-on .dots {
+  color: var(--accent);
+}
+
+.pipe-detail {
+  min-height: calc(3 * 1.5em);
+  margin-top: 0.7rem;
+  font-size: 0.93em;
+  line-height: 1.5;
 }
 
 /* Projects -------------------------------------------------------------- */
 
-.band-twilight {
-  --dusk-raised: #2c3970;
-  padding: clamp(2.5rem, 5vw, 3.5rem) 0 clamp(4.5rem, 8vw, 6rem);
-  background: #202b55;
-  color: var(--glow);
-}
-
 .projects {
   display: grid;
-  gap: clamp(3rem, 6vw, 4.5rem);
+  gap: clamp(3rem, 6vw, 4rem);
 }
 
 .project {
@@ -695,159 +746,114 @@ dd {
   align-items: center;
 }
 
-@media (min-width: 60rem) {
+@media (min-width: 58rem) {
   .project {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: clamp(2.5rem, 5vw, 4rem);
+    gap: 2.5rem;
   }
 
-  .project-flip .project-shot {
+  .project-flip .shot {
     order: 2;
   }
 }
 
-/* Screenshots sit in a stepped frame, like a window in the pixel world. */
-.project-shot {
+.shot {
   display: block;
   padding: 6px;
-  background: var(--dusk-raised);
-  clip-path: var(--px4);
-  transition: background-color 150ms ease;
+  border-radius: 12px;
+  background: var(--paper-deep);
 }
 
-.project-shot:hover {
-  background: var(--gold);
+.shot:hover {
+  background: var(--accent);
 }
 
-.project-shot img {
+.shot img {
   display: block;
   width: 100%;
   height: auto;
-  clip-path: var(--px2);
+  border-radius: 7px;
+  transition: transform 200ms ease;
 }
 
-.project h3 {
-  font-size: 2rem;
+@media (prefers-reduced-motion: no-preference) {
+  .shot:hover img {
+    transform: scale(0.985);
+  }
 }
 
-.project-what {
-  margin-top: 0.5rem;
+.project-text {
+  display: grid;
+  gap: 0.8rem;
 }
 
-.project-links {
-  margin-top: 1rem;
-  font-weight: 500;
+.project-text .chips {
+  margin-top: 0;
 }
 
-.project-links a {
-  text-decoration-color: var(--peach);
+.points li {
+  position: relative;
+  padding-left: 2.25ch;
+  font-size: 0.93em;
+  line-height: 1.55;
 }
 
-/* Contact --------------------------------------------------------------- */
-
-.band-night {
-  padding-top: clamp(2.5rem, 5vw, 3.5rem);
-  background: var(--night) var(--stars) repeat;
-  background-size: 192px 192px;
-  image-rendering: pixelated;
-  color: var(--glow);
+.points li + li {
+  margin-top: 0.45rem;
 }
 
-.contact-lead {
-  color: var(--haze);
+/* One dot per point. */
+.points li::before {
+  content: "";
+  position: absolute;
+  left: 0.2ch;
+  top: 0.6em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
-.contact-email {
-  margin-top: 0.4rem;
-  font-size: clamp(1.75rem, 4.5vw, 3rem);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+/* Contact and footer ---------------------------------------------------- */
+
+.email {
+  margin-top: 0.3rem;
+  font-size: clamp(1.4rem, 4.5vw, 2.25rem);
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
-.contact-email a {
-  text-decoration-color: var(--peach);
+.email a {
   text-decoration-thickness: 2px;
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.2em;
 }
 
-.contact-links {
+.links {
   display: flex;
-  gap: 1.75rem;
-  margin-top: 1.5rem;
-  padding: 0;
-  list-style: none;
+  flex-wrap: wrap;
+  gap: 0 3ch;
+  margin-top: 1.25rem;
 }
 
-.contact-links a {
-  text-decoration-color: var(--peach);
-}
-
-#night {
-  display: block;
-  margin-top: 1.5rem;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  cursor: pointer;
-}
-
-/* Footer ---------------------------------------------------------------- */
-
-.footer {
-  padding: 2rem 0 2.5rem;
-  background: #1c2347;
-  color: var(--haze);
-  font-size: 0.875rem;
-}
-
-.footer-row {
+.foot {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
-  gap: 1.25rem 3rem;
+  gap: 0.5rem 3ch;
+  margin-top: 5rem;
+  padding-top: 1.25rem;
+  border-top: 2px dotted var(--rule);
+  color: var(--muted);
+  font-size: 0.93em;
 }
 
-.footer-eggs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 2.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.footer-eggs li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
+.foot kbd {
+  color: var(--ink);
 }
 
 /* Keyboard tricks mean nothing on a phone. */
 @media (hover: none) and (pointer: coarse) {
-  .footer-eggs {
+  .keys {
     display: none;
   }
-}
-
-.keys {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.footer kbd {
-  display: inline-grid;
-  place-items: center;
-  min-width: 1.6rem;
-  height: 1.6rem;
-  padding: 0 0.35rem;
-  background: #2a3260;
-  color: var(--glow);
-  font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  clip-path: var(--px2);
 }
