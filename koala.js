@@ -1334,22 +1334,32 @@
   const shouldRun = () => !document.hidden && heroWants();
 
   function frame(now) {
-    if (!last) last = now;
-    acc += Math.min(100, now - last);
-    last = now;
-    while (acc >= STEP) {
-      stepKoala();
-      stepBall();
-      stepEffects();
-      acc -= STEP;
+    // Whatever happens in a frame, the loop must be able to start again: a
+    // frame that throws would otherwise leave `running` stuck and the court
+    // frozen (or, during the opening print, blank).
+    let again = false;
+    try {
+      if (!last) last = now;
+      acc += Math.min(100, now - last);
+      last = now;
+      while (acc >= STEP) {
+        stepKoala();
+        stepBall();
+        stepEffects();
+        acc -= STEP;
+      }
+      if (heroVisible) draw();
+      again = shouldRun();
+    } finally {
+      if (again) requestAnimationFrame(frame);
+      else running = false;
     }
-    if (heroVisible) draw();
-    if (shouldRun()) requestAnimationFrame(frame);
-    else running = false;
   }
 
+  // Nothing can be drawn until the first layout, so the loop waits for it.
+  // (The visibility observer can call start() before the court is built.)
   function start() {
-    if (running || !shouldRun()) return;
+    if (running || !L || !shouldRun()) return;
     running = true;
     last = 0;
     acc = 0;
@@ -1441,23 +1451,36 @@
     }
   });
 
+  // Build the court for the hero's current width, if it isn't already.
   let resizeTimer = 0;
   let builtWidth = -1;
+  function ensureBuilt() {
+    const width = hero.clientWidth;
+    if (!width || width === builtWidth) return;
+    builtWidth = width;
+    rebuild();
+  }
+
   new ResizeObserver(() => {
     if (hero.clientWidth === builtWidth) return;
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      builtWidth = hero.clientWidth;
-      rebuild();
-    }, L ? 120 : 0);
+    // The first build happens at once; later resizes wait for the drag to settle.
+    if (!L) ensureBuilt();
+    else resizeTimer = setTimeout(ensureBuilt, 120);
   }).observe(hero);
 
-  new IntersectionObserver(([entry]) => {
-    heroVisible = entry.isIntersecting;
+  new IntersectionObserver((entries) => {
+    heroVisible = entries[entries.length - 1].isIntersecting;
     start();
   }).observe(hero);
 
-  document.addEventListener('visibilitychange', start);
+  // Coming back to the tab, or the page being shown from a preload or the
+  // back button: make sure the court exists and the loop is going.
+  const revive = () => { ensureBuilt(); start(); };
+  document.addEventListener('visibilitychange', revive);
+  window.addEventListener('pageshow', revive);
+  window.addEventListener('load', revive);
   reducedMotion.addEventListener('change', start);
   setTime(timeKey, false);
+  ensureBuilt();
 })();
